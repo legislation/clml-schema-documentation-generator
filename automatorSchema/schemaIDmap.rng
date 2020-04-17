@@ -4,7 +4,11 @@
     xmlns:ci="http://macksol.co.uk/include" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
          xmlns="http://relaxng.org/ns/structure/1.0">
     
-    <a:documentation>Schema id to documentation map</a:documentation>
+    <a:documentation>
+        <p>Schema id to documentation map.</p>
+        <p>When generating schema documentation, if the id of an entry matches the id of a schema item (either manually added to the element/attribute or automatically generated as part of the preprocessing stage),
+        then the schema documentation generator will pull in all of the content specified by the include children of the entry.</p>
+    </a:documentation>
     <include href="xhtmltrans/modules/datatypes.rng"/>
     <include href="xhtmltrans/modules/attribs.rng"/>
     <include href="cinclude/cinclude.rng"/>
