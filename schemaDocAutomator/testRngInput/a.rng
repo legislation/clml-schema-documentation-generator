@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rng:grammar xmlns:rng="http://relaxng.org/ns/structure/1.0"
+             xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
+             xmlns:xhtml="http://www.w3.org/1999/xhtml"
+             xmlns:math="http://www.w3.org/1998/Math/MathML"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns="http://www.legislation.gov.uk/namespaces/legislation"
+             xmlns:err="http://www.tso.co.uk/assets/namespace/error"
+             ns="http://www.legislation.gov.uk/namespaces/legislation"
+             datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" xmlns:ci="http://macksol.co.uk/include">
+
+	  <a:documentation ci:id="schema">test top level rng schema - need to see how best to model includes
+	  <ci:include href="http://www.mackenziesolutions.co.uk" xpath="#fish" show="replace">Example</ci:include></a:documentation>
+
+	  <!-- ========== Complex types and content models ========== -->
+
+	
+	<rng:include href="a1.rng"/>
+	<rng:include href="commonElement.rng"/>
+	
+	<rng:start>
+		<a:documentation ci:id="start">start top level rng schema - need to see how best to model includes</a:documentation>
+		<rng:element name="top" ci:id="testtop">
+			<a:documentation>The top level element<![CDATA[<monster>fun</monster> ]]></a:documentation>
+			<rng:ref name="level2"/>
+			<rng:optional>
+				<rng:ref name="common" />
+			</rng:optional>
+			<rng:ref name="commonElement"/>
+        <rng:attribute name="country" a:defaultValue="US" ci:id="testattr">
+        	<a:documentation>
+        		<xhtml:div>
+        			<xhtml:p>The country attribute provides a choice of:</xhtml:p>
+        			<xhtml:ul>
+        				<xhtml:li>US</xhtml:li>
+        				<xhtml:li>JP</xhtml:li>
+        			</xhtml:ul>
+        		</xhtml:div>
+        	</a:documentation>
+          <rng:choice>
+            <rng:value>US</rng:value>
+            <rng:value>JP</rng:value>
+          </rng:choice>
+        </rng:attribute>
+		</rng:element>
+	</rng:start>
+	
+	<rng:define name="common">
+		<a:documentation>
+        	<xhtml:p>Common definition</xhtml:p>
+        	<ci:include href="zoo-doc.xhtml#cheetah"/>
+        </a:documentation>
+		<rng:element name="reuseme">
+			<a:documentation>
+	        	<xhtml:p>reuseme defintion</xhtml:p>
+        		<ci:include href="zoo-doc.xhtml" xpath="#cheetah" xpathInner="*:p[1]"/>
+				<ci:include href="anaw-2018-1-historical-2018-01-24.xml" xpath="/*:Legislation/*:Primary/*:PrimaryPrelims"/>
+	        </a:documentation>
+			<rng:text/>
+		</rng:element>
+		<rng:element name="reuseme2">
+			<a:documentation>
+	        	<xhtml:p>reuseme2 defintion</xhtml:p>
+        		<ci:include href="zoo-doc.xhtml" xpath="#elephant"/>
+	        </a:documentation>
+			<rng:text/>
+		</rng:element>
+	</rng:define>
+</rng:grammar>

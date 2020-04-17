@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar ns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:err="http://www.tso.co.uk/assets/namespace/error" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://relaxng.org/ns/structure/1.0">
+  <a:documentation>common element held in a common schema, included in top schema and then accessible to all subschemas</a:documentation>
+  <define name="commonElement">
+    <element>
+      <name ns="http://www.legislation.gov.uk/namespaces/legislation">commonElement</name>
+      <text/>
+    </element>
+    <optional>
+      <ref name="level2extra"/>
+    </optional>
+  </define>
+</grammar>

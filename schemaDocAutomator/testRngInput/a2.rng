@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar ns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:err="http://www.tso.co.uk/assets/namespace/error" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://relaxng.org/ns/structure/1.0">
+  <a:documentation>third level rng schema - can access common model in top level (two levels up)</a:documentation>
+  <define name="level3">
+    <element>
+      <name ns="http://www.legislation.gov.uk/namespaces/legislation">level3</name>
+      <ref name="common"/>
+      <ref name="commonElement"/>
+    </element>
+  </define>
+</grammar>

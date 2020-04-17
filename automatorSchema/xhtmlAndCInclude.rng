@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CHTML plus custom include -->
+<grammar ns="http://www.w3.org/1999/xhtml"  xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" 
+    xmlns:ci="http://macksol.co.uk/include"
+         xmlns="http://relaxng.org/ns/structure/1.0">
+    
+    <a:documentation>XHTML transitional plus custom include module</a:documentation>
+    <include href="cinclude/cinclude.rng"/>
+    <include href="xhtmltrans/xhtml.rng"/>
+    
+    <define name="Block.class" combine="choice">
+        <choice>
+          <ref name="include"/>
+          <ref name="toc" ns="http://macksol.co.uk/include"/>
+        </choice>
+    </define>
+    
+    <define name="Inline.class" combine="choice">
+        <choice>
+          <ref name="include"/>
+          <ref name="date" ns="http://macksol.co.uk/include"/>
+          <ref name="dateTime" ns="http://macksol.co.uk/include"/>
+        </choice>
+    </define>
+</grammar>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- custom includes -->
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" ns="http://macksol.co.uk/include"
+             xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+
+  <a:documentation>
+        <p>The "include" mechanism is not using x:include as some processors will resolve those links even without requesting to do so when the schema is opened in other tools.</p>
+        <p>The custom include markup is also more powerful than standard xInclude.</p>
+        <p>The namespace for the custom include element is currently <code>xmlns:ci="http://macksol.co.uk/include"</code>.</p>
+        <h1>Mandatory Attributes</h1>
+        <p><code>href</code> - URI to the file that you want to include (or partially include) e.g. <code>href="uksi_20052087_en.xml" or href="schemaCommonNonEdit_xsd.html"</code>.</p>
+        <p>If no path is specified then the folder used depends on the file extension:</p>
+        <ul>
+          <li>'.xml'=$gpSampleXmlFolder (e.g. to include examples of keying that illustrates how an element(s) is used</li>
+          <li>'.html'=$gpOutputFolder (e.g. to include formatted annotations or an image map+image from the generated schema documentation in the user guide)</li>
+          <li>'.htm'=$gpExtraDocFolder (e.g. to include some externally generated or manually keyed html documentation )</li>
+        </ul>
+        <p>OR</p>
+        <p><code>id</code> - As an alternative to using <code>href</code> to specify URI to the file, you can use <code>id</code> to specify the what include(s) (or partially include(s)) should be automatically inserted based on the id look-up file (see below) e.g. <code>id="schemaLegislationMetadata-E-DepartmentCode"</code>.</p>
+        <h1>Optional Attributes</h1>
+        <ul>
+          <li><code>fileref</code> - used to control the generation of a reference paragraph that is output to indicate where the content being embedded comes from. If the attribute is empty or is the word "no" then no reference is generated. If the attribute is missing or set to "yes" then default text is output that includes the <code>@href</code> value. Any other value is treated as the text to be output as the file reference.</li>
+          <li><code>source</code> - used to indicate the nature of the content that can then be used to style the output. Current values are "example" (used to indicate the content is a source example) or "output" (used to indicate it reflects the rendered output). For embedded images the default is "output".</li>
+          <li><code>show</code> - controls how the link is instantiated (adapted from x:link).Values also include:
+            <ul>
+              <li>new - creates a hyperlink to the content that will open in a new window</li>
+              <li>replace - creates a hyperlink to the content that will replace the current content in the current window</li>
+              <li>embed (default) - includes the content at the current point. If the content is XML then it will be embedded in a <code>pre</code> element to preserve space.</li>
+              <li>showimage (default if the file extension is once of the supported image types) - includes the content using an html <code>img</code> element.</li>
+            </ul>
+          </li>
+          <li><code>xpath</code> - describes which subset of the content (if the content is well formed HTML or XML) should be included using the standard XPath format when embedding content e.g. xpath="/*:Legislation/*:Metadata". Namespace prefixes can be used as log as they are declared in this XSLT. In order to more easily include images or annotations from the Oxygen-generated HTML documentation (and to ensure that complex and potentially changeable HTML paths are not hard coded into documentation) the user can utilise the following public functions:
+            <ul>
+              <li><code>cm:getImageFromTitle(contextNode, titleOfComponentInGeneratedDocumentation)</code> - e.g. to get the structure image map plus image for the "DocumentClassification" element we would use <code>href="schemaLegislationMetadata_xsd.html" xpath="cm:getImageFromTitle(.,'DocumentClassification')"</code></li>
+              <li><code>cm:getImageFromId(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this performs the same role as above but uses the html id for the component that you want the structure image of (useful where the title is not simply the element/attribute/group name)</li>
+              <li><code>cm:getAnnotationsFromTitle(contextNode, titleOfComponentInGeneratedDocumentation)</code> - e.g. to get the HTML annotation content of the "Year" element we would use <code>href="schemaLegislationMetadata_xsd.html" xpath="cm:getAnnotationsFromTitle(.,'Year')"</code></li>
+              <li><code>cm:getAnnotationsFromId(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this performs the same role as above but uses the html id for the component that you want the annotation of (useful where the title is not simply the element/attribute/group name) e.g. <code>href="schemaLegislationMetadata_xsd.html" xpath="cm:getAnnotationsFromId(.,'AlternativeNumber_Value')"</code></li>
+            </ul>
+          </li>
+          <li><code>xpathInner</code> - describes which <b>subset</b> of the <code>xpath</code> content (if the content is well-formed HTML or XML) should be included using the standard XPath format when embedding content. This is useful if you wanted to show the context of an element but not include all of its contents e.g. xpath="/*:Legislation/*:Metadata/*:SecondaryMetadata" xpathInner="*:Year|*:Number" will output the SecondaryMetadata element start and end but only output the Year and/or Number within it. If this attribute is used and <code>@fileref</code> is turned on the an extra paragraph is generated indicating that it is a partial sample.</li>
+        </ul>
+        <p>Any other attributes will be passed through to the HTML.</p>
+        <p>This module also supports the generation a table of contents from <code>h1</code> headings of divs, where a <code>ci:toc</code> element is found.</p>
+        <h1>id map file</h1>
+        <p>While it is possible for schema developers to manually insert custom include elements inside the schema xs:documentation elements, it is easier to manage these (and keeps the schema annotations brief) if the custm includes are automatically injected via the id map file.</p>
+        <p>When the code in genMoveAnnotations.xslt processes a schema element or attribute, it gathers the schema components' id. If the id attribute is present on the schema component then it is used otherwise an id is calculated based on the schema filename, the type of component and the component name (e.g. "schemaLegislationMetadata-E-AlternativeNumber").</p>
+        <p>This id is thne used as a key to a look-up in the id mapping file (finds an entry element in no namespace with the same id attribute) and all child custom include elements (or any other elements) are then included and processed. e.g. </p>
+        <pre xml:space="preserve">
+            &lt;entry id="schemaLegislationMetadata-E-DepartmentCode"&gt;
+                &lt;ci:include href="uksi_20052087_en.xml" xpath="/*:Legislation/*:Metadata" fileref="Example taken from uksi_20052087_en (PDF p. 1, XML Ref. UG00202)"  source="example"/&gt;
+                &lt;ci:include href="rgDepartmentCode.png" alt="Example taken from uksi_20052087_en (PDF p. 1, XML Ref. UG00202)" source="output"/&gt;
+            &lt;/entry&gt;
+        </pre>
+        <h1>Other</h1>
+        <p>The parameters used in this XSLT will be documented in the XProc "generateSchemaDoc.xpl"</p>
+  </a:documentation>
+  
+  <define name="include">
+    <element name="include">
+      <empty/>
+      <choice>
+        <attribute name="href">
+          <data type="anyURI"/>
+        </attribute>
+         <attribute name="id">
+           <data type="ID"/>
+         </attribute>
+      </choice>
+      <optional>
+        <attribute name="fileref">
+          <choice>
+            <value type="token">yes</value>
+            <value type="token">no</value>
+            <data type="string"/>
+          </choice>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="source">
+          <choice>
+            <value type="token">example</value>
+            <value type="token">output</value>
+          </choice>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="show">
+          <choice>
+            <value type="token">new</value>
+            <value type="token">replace</value>
+            <value type="token">embed</value>
+            <value type="token">showimage</value>
+          </choice>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="xpath">
+          <data type="token">
+            <param name="minLength">1</param>
+          </data>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="xpathInner">
+          <data type="token">
+            <param name="minLength">1</param>
+          </data>
+        </attribute>
+      </optional>
+      <optional>
+        <ref name="class.attrib"/>
+      </optional>
+      <optional>
+        <ref name="title.attrib"/>
+      </optional>
+      <optional>
+        <ref name="I18n.attrib"/>
+      </optional>
+      <optional>
+        <attribute name="style"/>
+      </optional>
+    </element>
+  </define>
+  
+  <define name="toc">
+    <element name="toc">
+      <empty/>
+    </element>
+  </define>
+  
+  <define name="date">
+    <element name="date">
+      <empty/>
+    </element>
+  </define>
+  
+  <define name="dateTime">
+    <element name="dateTime">
+      <empty/>
+    </element>
+  </define>
+  
+
+</grammar>

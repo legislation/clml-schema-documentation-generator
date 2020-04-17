@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar ns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:err="http://www.tso.co.uk/assets/namespace/error" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://relaxng.org/ns/structure/1.0">
+  <a:documentation>second level rng schema - can access common model in top level</a:documentation>
+  <include href="a2.rng" ns="http://www.legislation.gov.uk/namespaces/legislation"/>
+  <define name="level2">
+    <element>
+      <name ns="http://www.legislation.gov.uk/namespaces/legislation">level2a</name>
+      <text/>
+    </element>
+    <element>
+      <name ns="http://www.legislation.gov.uk/namespaces/legislation">level2b</name>
+      <ref name="level3"/>
+      <ref name="common"/>
+    </element>
+  </define>
+  <define name="level2extra">
+    <element>
+      <name ns="http://www.legislation.gov.uk/namespaces/legislation">level2extra</name>
+      <text/>
+    </element>
+  </define>
+</grammar>

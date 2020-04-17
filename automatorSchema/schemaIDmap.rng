@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CHTML plus custom include -->
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" 
+    xmlns:ci="http://macksol.co.uk/include" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+         xmlns="http://relaxng.org/ns/structure/1.0">
+    
+    <a:documentation>Schema id to documentation map</a:documentation>
+    <include href="xhtmltrans/modules/datatypes.rng"/>
+    <include href="xhtmltrans/modules/attribs.rng"/>
+    <include href="cinclude/cinclude.rng"/>
+    
+    <start>
+        <element name="idmap">
+            <oneOrMore>
+                <element name="entry">
+                    <attribute name="id">
+                        <data type="ID"/>
+                    </attribute>
+                    <oneOrMore>
+                        <ref name="include"/>
+                    </oneOrMore>
+                </element>
+            </oneOrMore>
+        </element>
+    </start>
+</grammar>
