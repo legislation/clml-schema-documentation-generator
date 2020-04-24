@@ -21,6 +21,7 @@
     <p:option required="true" name="pHtmlFilename"/>
     <p:option required="true" name="pExtraDocFolder"/>
     <p:option required="true" name="pSampleXmlFolder"/>
+    <p:option required="true" name="pReferenceGuide"/>
     <p:option required="true" name="pOutputFolder"/>
     <p:option required="true" name="pSchemaMapFile"/>
     <p:option required="true" name="pGenerateConfigIDpara"/>
@@ -41,6 +42,7 @@
         <p:with-param name="gpOutputFolder" select="$pOutputFolder"/>
         <p:with-param name="gpSchemaIdMap" select="$pSchemaMapFile"/>
         <p:with-param name="gpGenerateConfigIDpara" select="$pGenerateConfigIDpara"/>
+        <p:with-param name="gpReferenceGuide" select="$pReferenceGuide"/>
     </p:xslt>
     <p:store name="userGuideOut">
       <p:with-option name="href" select="concat($pOutputFolder,'/', $pHtmlFilename)"/>

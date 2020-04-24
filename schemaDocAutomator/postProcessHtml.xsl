@@ -156,6 +156,19 @@
         </xsl:copy>
     </xsl:template>
     
+    <!-- change any static links to the reference guide to the name supplied 
+        in order to save the user form manually changing for every version if 
+        the reference filename contains version  -->
+    <xsl:template match="a/@href[starts-with(.,'reference.html') and $gpReferenceGuide]" priority="+1">
+        <xsl:attribute name="href">
+            <xsl:value-of select="$gpReferenceGuide"/>
+            <xsl:if test="contains(.,'#')">
+                <xsl:text>#</xsl:text>
+                <xsl:value-of select="substring-after(.,'#')"/>
+            </xsl:if>
+        </xsl:attribute>
+    </xsl:template>
+    
     <xsl:template name="insertExampleAndOutput">
         <!-- to do add proper logic and function 
         ancestor::table[@class='rt']/preceding-sibling

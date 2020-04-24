@@ -139,6 +139,7 @@
       <p:with-option name="pHtmlFilename" select="$pUserGuide"/>
       <p:with-option name="pExtraDocFolder" select="$pExtraDocFolder"/>
       <p:with-option name="pSampleXmlFolder" select="$pSampleXmlFolder"/>
+      <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
       <p:with-option name="pSchemaMapFile" select="$pSchemaMapFile"/>
       <p:with-option name="pGenerateConfigIDpara" select="$pGenerateConfigIDpara"/>

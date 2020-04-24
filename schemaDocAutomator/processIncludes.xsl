@@ -323,15 +323,15 @@
         <xsl:choose>
             <xsl:when test="$pDocType='html'">
                 <xsl:element name="{local-name()}">
-                    <xsl:copy-of select="@*"/>
+                    <xsl:apply-templates select="@*"/>
                     <xsl:apply-templates select="if ($pDocPartSubContent) then $pDocPartSubContent else node()">
                         <xsl:with-param  name="pDocType" select="$pDocType"/>
                     </xsl:apply-templates>
                 </xsl:element>
             </xsl:when>
             <xsl:when test="$pLevel = 0">
-                <!-- get the indent of the first child element -->
-                <xsl:variable name="vInitialIndent" select="replace(node()[self::text()[normalize-space()=''] and (position() = 1)],'\n','')" as="xs:string?"/>
+                <!-- get the indent of the end element via the whitespace after end of first child -->
+                <xsl:variable name="vInitialIndent" select="replace(*[last()]/following-sibling::text()[self::text()[normalize-space()=''] and (position() = last())],'\n','')" as="xs:string?"/>
                 <xsl:variable name="vSampleXML" as="node()*">
                     <xsl:call-template name="outputEscapedStartElementName"/>
                     <xsl:choose>
@@ -360,22 +360,22 @@
                 <pre xml:space="preserve"><xsl:sequence select="$vSampleXML"/></pre>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:if test="($pLevel=1) and $pInitialIndent != ''">
-                    <!-- we measured the indent form the first child so we need to add in one tab here
-                        IF there was a start indent-->
+                <!--<xsl:if test="($pLevel=1) and $pInitialIndent != ''">
+                    <!-\- we measured the indent form the first child so we need to add in one tab here
+                        IF there was a start indent-\->
                     <xsl:text>  </xsl:text>
-                </xsl:if>
+                </xsl:if>-->
                  <xsl:call-template name="outputEscapedStartElementName"/>
                  <xsl:apply-templates select="node()">
                      <xsl:with-param name="pDocType" select="$pDocType"/>
                      <xsl:with-param name="pLevel" select="$pLevel + 1"/>
                      <xsl:with-param name="pInitialIndent" select="$pInitialIndent"/>
                  </xsl:apply-templates>
-                 <xsl:if test="($pLevel=1) and ($pInitialIndent != '') and contains(./text()[last()],'&#x09;')">
-                    <!-- we measured the indent form the first child so we need to add in one tab here
-                    but NOT if the end element is on same line as start element-->
+                 <!--<xsl:if test="($pLevel=1) and ($pInitialIndent != '') and contains(./text()[last()],'&#x09;')">
+                    <!-\- we measured the indent form the first child so we need to add in one tab here
+                    but NOT if the end element is on same line as start element-\->
                     <xsl:text>  </xsl:text>
-                 </xsl:if>
+                 </xsl:if>-->
                  <xsl:call-template name="outputEscapedEndElementName"/>
             </xsl:otherwise>
         </xsl:choose>
@@ -403,44 +403,40 @@
         </xsl:if>
     </xsl:template>
     
+    <xsl:template match="@*">
+        <xsl:copy-of select="."/>
+    </xsl:template>
+    
     <xsl:template match="text()">
         <xsl:param  name="pDocType" select="'html'" as="xs:string"/>
         <xsl:param  name="pLevel" select="0" as="xs:integer"/>
         <xsl:param  name="pInitialIndent" select="''" as="xs:string"/>
-        <xsl:variable name="vSmallerIndent" select="substring($pInitialIndent,1,string-length($pInitialIndent)-1)" as="xs:string?"/>
+        <!--<xsl:variable name="vSmallerIndent" select="substring($pInitialIndent,1,string-length($pInitialIndent)-1)" as="xs:string?"/>-->
         <xsl:choose>
             <xsl:when test="$pDocType='html'">
                 <xsl:value-of select="."/>
             </xsl:when>
             <xsl:otherwise>
                 <span class="tT">
-                    <xsl:choose>
-                        <xsl:when test="($pInitialIndent != '') and starts-with(.,$pInitialIndent)">
-                            <!--<test t="1" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
-                            <!-- replace the initial indent but only once within the string -->
-                            <xsl:value-of select="replace(.,concat('^',$pInitialIndent,'(.*)'),'$1')"/>
-                        </xsl:when>
-                        <xsl:when test="($pInitialIndent != '') and ends-with(.,$pInitialIndent)">
-                            <!--<test t="2" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
-                            <!-- replace the initial indent but only once within the string -->
-                            <xsl:value-of select="replace(.,concat('(.*)',$pInitialIndent,'$'),'$1')"/>
-                        </xsl:when>
-                        <xsl:when test="($vSmallerIndent != '') and starts-with(.,$vSmallerIndent)">
-                            <!--<test t="3" this="{.}" vSmallerIndent="{string-to-codepoints($vSmallerIndent)}"/>-->
-                            <!-- replace the initial indent but only once within the string -->
-                            <xsl:value-of select="replace(.,concat('^',$vSmallerIndent,'(.*)'),'$1')"/>
-                        </xsl:when>
-                        <xsl:when test="($vSmallerIndent != '') and ends-with(.,$vSmallerIndent)">
-                            <!--<test t="4" this="{.}" vSmallerIndent="{string-to-codepoints($vSmallerIndent)}"/>-->
-                            <!-- replace the initial indent but only once within the string -->
-                            <xsl:value-of select="replace(.,concat('(.*)',$vSmallerIndent,'$'),'$1')"/>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <!--<test t="5" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}" vSmallerIndent="{string-to-codepoints($vSmallerIndent)}"/>-->
-                            <!--  do not use style="white-space:normal" loses indent as all space collapsed to one space -->
-                            <xsl:value-of select="."/>
-                        </xsl:otherwise>
-                    </xsl:choose>
+                    <xsl:variable name="vValue" as="xs:string?">
+                        <xsl:choose>
+                            <xsl:when test="($pInitialIndent != '') and starts-with(.,$pInitialIndent)">
+                                <!--<test t="1" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
+                                <xsl:value-of select="replace(.,concat('^',$pInitialIndent,'(.*)'),'$1')"/>
+                            </xsl:when>
+                            <xsl:when test="($pInitialIndent != '') and ends-with(.,$pInitialIndent)">
+                                <!--<test t="2" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
+                                <xsl:value-of select="replace(.,concat('(.*)',$pInitialIndent,'$'),'$1')"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <!--<test t="5" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}" vSmallerIndent="{string-to-codepoints($vSmallerIndent)}"/>-->
+                                <!--  do not use style="white-space:normal" loses indent as all space collapsed to one space -->
+                                <xsl:value-of select="."/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:variable>
+                    <!-- to stop indents getting too big, swap tabs for two spaces -->
+                    <xsl:value-of select="replace($vValue,'\t','  ')"/>
                 </span>
             </xsl:otherwise>
         </xsl:choose>
