@@ -60,9 +60,9 @@
   <p:option required="false" name="pHtmlAssetsSubFolder" select="'img'"/>
   <p:option required="false" name="pSampleXmlFolder" select="'file:/C:/Users/colin/unified-master-schema/schemaDoc/CLMLfiles/sampleXML'"/>
   <p:option required="false" name="pSchemaMapFile" select="'schemaId2doc.map'"/>
-  <p:option required="false" name="pReferenceGuide" select="'CLMLreferenceGuide-v2-1.html'"/>
+  <p:option required="false" name="pReferenceGuide" select="'CLMLreferenceGuide-v2-2.html'"/>
   <p:option required="false" name="pStartURL" select="'schemaLegislationCore_xsd.html#Legislation'"/>
-  <p:option required="false" name="pUserGuide" select="'CLMLuserGuide-v2-1.html'"/>
+  <p:option required="false" name="pUserGuide" select="'CLMLuserGuide-v2-2.html'"/>
   
   <p:option required="false" name="pTempFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/temp/schemaTempFolder'"/>
   <p:option required="false" name="pOxygenOutputFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/temp/oxygenOutput'"/>
