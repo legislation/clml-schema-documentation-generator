@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:xo="http://xmlopen.org/xproc" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+    xmlns:cm="http://macksol.co.uk" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
     xmlns:c="http://www.w3.org/ns/xproc-step"
     xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
-    xmlns:cx="http://xmlcalabash.com/ns/extensions" type="xo:generateHTMLdoc" name="generateHTMLdoc"
+    xmlns:cx="http://xmlcalabash.com/ns/extensions" type="cm:generateHTMLdoc" name="generateHTMLdoc"
     xmlns:xh="http://www.w3.org/1999/xhtml" version="1.0">
     
     <p:documentation>
@@ -76,9 +76,9 @@
             </p:exec>
             <p:sink/>
           
-            <xo:getFolderList>
+            <cm:getFolderList>
               <p:with-option name="pFolderPath" select="$pOxygenOutputFolder"/>
-            </xo:getFolderList>
+            </cm:getFolderList>
             <p:identity name="oxyFileList"/>
         
             <p:filter select="//*:file[ends-with(@name,'.html') or ends-with(@name,'.htm')]"/> 

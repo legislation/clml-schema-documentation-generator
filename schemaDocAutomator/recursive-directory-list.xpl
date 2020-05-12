@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc" xmlns:tr="http://transpect.io"
-  xmlns:xo="http://xmlopen.org/xproc" type="xo:recursive-directory-list" version="1.0">
+  xmlns:cm="http://macksol.co.uk" type="cm:recursive-directory-list" version="1.0">
   <p:output port="result"/>
   <p:option name="path" required="true"/>
   <p:option name="include-filter"/>
@@ -45,35 +45,35 @@
           <p:when
             test="p:value-available('include-filter')
                           and p:value-available('exclude-filter')">
-            <xo:recursive-directory-list>
+            <cm:recursive-directory-list>
               <p:with-option name="path" select="concat($path,'/',$name)"/>
               <p:with-option name="include-filter" select="$include-filter"/>
               <p:with-option name="exclude-filter" select="$exclude-filter"/>
               <p:with-option name="depth" select="$depth - 1"/>
-            </xo:recursive-directory-list>
+            </cm:recursive-directory-list>
           </p:when>
 
           <p:when test="p:value-available('include-filter')">
-            <xo:recursive-directory-list>
+            <cm:recursive-directory-list>
               <p:with-option name="path" select="concat($path,'/',$name)"/>
               <p:with-option name="include-filter" select="$include-filter"/>
               <p:with-option name="depth" select="$depth - 1"/>
-            </xo:recursive-directory-list>
+            </cm:recursive-directory-list>
           </p:when>
 
           <p:when test="p:value-available('exclude-filter')">
-            <xo:recursive-directory-list>
+            <cm:recursive-directory-list>
               <p:with-option name="path" select="concat($path,'/',$name)"/>
               <p:with-option name="exclude-filter" select="$exclude-filter"/>
               <p:with-option name="depth" select="$depth - 1"/>
-            </xo:recursive-directory-list>
+            </cm:recursive-directory-list>
           </p:when>
 
           <p:otherwise>
-            <xo:recursive-directory-list>
+            <cm:recursive-directory-list>
               <p:with-option name="path" select="concat($path,'/',$name)"/>
               <p:with-option name="depth" select="$depth - 1"/>
-            </xo:recursive-directory-list>
+            </cm:recursive-directory-list>
           </p:otherwise>
         </p:choose>
       </p:when>

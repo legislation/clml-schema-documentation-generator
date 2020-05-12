@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:xo="http://xmlopen.org/xproc" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+    xmlns:cm="http://macksol.co.uk" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
     xmlns:c="http://www.w3.org/ns/xproc-step"  xmlns:h="http://www.w3.org/1999/xhtml"
     xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
-    xmlns:cx="http://xmlcalabash.com/ns/extensions" type="xo:getFolderList" name="getFolderList"
+    xmlns:cx="http://xmlcalabash.com/ns/extensions" type="cm:getFolderList" name="getFolderList"
     xmlns:xh="http://www.w3.org/1999/xhtml" version="1.0">
     
     <p:documentation>
@@ -27,9 +27,9 @@
     <p:identity name="addRelnameXSLT"/>
     <p:sink/>
     
-    <xo:recursive-directory-list depth="-1" name="getconvertedXSDList">
+    <cm:recursive-directory-list depth="-1" name="getconvertedXSDList">
         <p:with-option name="path" select="$pFolderPath"/>
-    </xo:recursive-directory-list>
+    </cm:recursive-directory-list>
     
     <!-- Colin: Add relative paths to relname attribute so we can keep subfolders in output if we transform data -->
     <p:xslt name="xsltFolderList">

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:xo="http://xmlopen.org/xproc" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+    xmlns:cm="http://macksol.co.uk" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
     xmlns:c="http://www.w3.org/ns/xproc-step"  xmlns:h="http://www.w3.org/1999/xhtml"
     xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
-    xmlns:cx="http://xmlcalabash.com/ns/extensions" type="xo:xsdGenMoveComments" name="xsdGenMoveComments"
+    xmlns:cx="http://xmlcalabash.com/ns/extensions" type="cm:xsdGenMoveComments" name="xsdGenMoveComments"
     xmlns:xh="http://www.w3.org/1999/xhtml" version="1.0">
     
     <p:documentation>
@@ -35,9 +35,9 @@
     <p:load name="genMoveXsdAnnotationsXSLT" href="genMoveXsdAnnotationsXSLT.xsl"/>
     <p:sink/>
     
-    <xo:getFolderList>
+    <cm:getFolderList>
         <p:with-option name="pFolderPath" select="$pInputFolderUri"/>
-    </xo:getFolderList>
+    </cm:getFolderList>
           
     <p:filter select="//*:file[ends-with(@name,'.xsd') or ends-with(@name,'.xs')]"/> 
     <p:for-each name="iterate" >

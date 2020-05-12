@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <p:declare-step xmlns:p="http://www.w3.org/ns/xproc" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:xo="http://xmlopen.org/xproc" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
+    xmlns:cm="http://macksol.co.uk" xmlns:sch="http://purl.oclc.org/dsdl/schematron"
     xmlns:c="http://www.w3.org/ns/xproc-step" xmlns:h="http://www.w3.org/1999/xhtml"
     xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
     xmlns:cx="http://xmlcalabash.com/ns/extensions"
@@ -90,37 +90,37 @@
  
   <p:group>
      <!-- need to clear out temp and output folders-->
-     <xo:deleteAndMakeFolder>
+     <cm:deleteAndMakeFolder>
        <p:with-option name="pFolder" select="concat($pTempFolder,'/rng2xsd')"/>
-     </xo:deleteAndMakeFolder>
-     <xo:deleteAndMakeFolder>
+     </cm:deleteAndMakeFolder>
+     <cm:deleteAndMakeFolder>
        <p:with-option name="pFolder" select="$pOxygenOutputFolder"/>
-     </xo:deleteAndMakeFolder>
-     <xo:deleteAndMakeFolder>
+     </cm:deleteAndMakeFolder>
+     <cm:deleteAndMakeFolder>
        <p:with-option name="pFolder" select="$pOutputFolder"/>
-     </xo:deleteAndMakeFolder>
+     </cm:deleteAndMakeFolder>
      <p:choose>
        <p:when test="ends-with($pInputSchemaFile,'rng')">
-         <xo:rng2xsd>
+         <cm:rng2xsd>
            <p:with-option name="pInputFolderUri" select="$pInputFolderUri"/>
            <p:with-option name="pInputSchemaFile" select="$pInputSchemaFile"/>
            <p:with-option name="pTempFolder" select="$pTempFolder"/>
            <p:with-option name="pWorkingDirectoryPath" select="$pWorkingDirectoryPath"/>
-         </xo:rng2xsd>
+         </cm:rng2xsd>
          <!-- to do ensure that any file or element or attribute ids in RNG custom markup are treated like schema element ids and then
            add linkmap processing like we do for xsd files (by re-using a common XSLT) -->
        </p:when>
        <p:otherwise>
-         <xo:xsdGenMoveComments>
+         <cm:xsdGenMoveComments>
            <p:with-option name="pInputFolderUri" select="$pInputFolderUri"/>
            <p:with-option name="pTempFolder" select="$pTempFolder"/>
            <p:with-option name="pExtraDocFolder" select="$pExtraDocFolder"/>
            <p:with-option name="pSchemaMapFile" select="$pSchemaMapFile"/>
-         </xo:xsdGenMoveComments>
+         </cm:xsdGenMoveComments>
        </p:otherwise>
      </p:choose>
     
-    <xo:generateHTMLdoc>
+    <cm:generateHTMLdoc>
       <p:with-option name="pInputSchemaFile" select="$pInputSchemaFile"/>
       <p:with-option name="pTempFolder" select="$pTempFolder"/>
       <p:with-option name="pWorkingDirectoryPath" select="$pWorkingDirectoryPath"/>
@@ -132,10 +132,10 @@
       <p:with-option name="pOxygenOutputFolder" select="$pOxygenOutputFolder"/>
       <p:with-option name="pOxySettingsFilename" select="$pOxySettingsFilename"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
-    </xo:generateHTMLdoc>
+    </cm:generateHTMLdoc>
      
     <!-- now process the user guide-->
-    <xo:populateHTMLdoc>
+    <cm:populateHTMLdoc>
       <p:with-option name="pHtmlFilename" select="$pUserGuide"/>
       <p:with-option name="pExtraDocFolder" select="$pExtraDocFolder"/>
       <p:with-option name="pSampleXmlFolder" select="$pSampleXmlFolder"/>
@@ -143,13 +143,13 @@
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
       <p:with-option name="pSchemaMapFile" select="$pSchemaMapFile"/>
       <p:with-option name="pGenerateConfigIDpara" select="$pGenerateConfigIDpara"/>
-    </xo:populateHTMLdoc>
+    </cm:populateHTMLdoc>
        
     <!-- then copy any supporting files into the output -->
-    <xo:copyFiles>
+    <cm:copyFiles>
       <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pHtmlAssetsSubFolder)"/>
       <p:with-option name="pOutputFolder" select="concat($pOutputFolder,'/',$pHtmlAssetsSubFolder)"/>
-    </xo:copyFiles>
+    </cm:copyFiles>
   </p:group>
   
 </p:declare-step>
