@@ -2,7 +2,7 @@
 # Schema Documentation Generator Tool
 
 This tool generates a schema reference guide (complete with navigable image maps) and optionally an integrated user guide (created from an XHTML skeleton file) from an XSD schema.
-Prototyping has been performed to show that the tool can convert an RNG schema to SD and maintain structured or XHTML documentation when converting to XSD prior to creating documentation from that XSD.
+Prototyping has been performed to show that the tool can convert an RNG schema to XSD and maintain structured or XHTML documentation when converting to XSD prior to creating documentation from that XSD.
 
 The documentation can be augmented by the inclusion (using a custom include approach) of XML samples (or subsets) and images and links added via a map file.
 These contents can also be added to the user guide using the custom include markup and the user guide can also pull in auto generated content from the reference guide (such as navigable structure diagrams).
