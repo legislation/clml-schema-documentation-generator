@@ -45,7 +45,8 @@
               <li><code>cm:getAnnotationsFromId(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this performs the same role as above but uses the html id for the component that you want the annotation of (useful where the title is not simply the element/attribute/group name) e.g. <code>href="schemaLegislationMetadata_xsd.html" xpath="cm:getAnnotationsFromId(.,'AlternativeNumber_Value')"</code></li>
             </ul>
           </li>
-          <li><code>xpathInner</code> - describes which <b>subset</b> of the <code>xpath</code> content (if the content is well-formed HTML or XML) should be included using the standard XPath format when embedding content. This is useful if you wanted to show the context of an element but not include all of its contents e.g. xpath="/*:Legislation/*:Metadata/*:SecondaryMetadata" xpathInner="*:Year|*:Number" will output the SecondaryMetadata element start and end but only output the Year and/or Number within it. If this attribute is used and <code>@fileref</code> is turned on the an extra paragraph is generated indicating that it is a partial sample.</li>
+          <li><code>xpathInner</code> - describes which selected <b>subset</b> of the <code>xpath</code> content (if the content is well-formed HTML or XML) should be included using the standard XPath format when embedding content. Cannot be used in combination with <code>xpathStopAfter</code>. This is useful if you wanted to show the context of an element but not include all of its contents e.g. xpath="/*:Legislation/*:Metadata/*:SecondaryMetadata" xpathInner="*:Year|*:Number" will output the SecondaryMetadata element start and end but only output the Year and/or Number within it. If this attribute is used and <code>@fileref</code> is turned on the an extra paragraph is generated indicating that it is a partial sample.</li>
+          <li><code>xpathStopAfter</code> - describes where to stop including the <b>subset</b> of the <code>xpath</code> content (all elements up to this point will be included) when embedding content. Cannot be used in combination with <code>xpathInner</code>. This is useful if you wanted to show the context of an element but not include all of its contents e.g. xpath="/*:Legislation/*:Primary/*:Body" xpathStopAfter="*:Part[1]/*:Chapter[1]/*:P1group[1]/*:P1[1]/*:P1para/*:P2[1]" will output the content up to and including the specified P2 element.</li>
         </ul>
         <p>Any other attributes will be passed through to the HTML.</p>
         <p>This module also supports the generation a table of contents from <code>h1</code> headings of divs, where a <code>ci:toc</code> element is found.</p>
@@ -187,7 +188,7 @@
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <!-- vXpathInsideSelector only applies to show="embed" -->
+        <!-- vXpathInsideSelector only applies to show="embed" and @xpathInner cannot be used in combination with @xpathStopAfter -->
         <xsl:variable name="vXpathInsideSelector" as="xs:string?">
             <xsl:choose>
                 <xsl:when test="$vShow != 'embed'"/>
@@ -196,6 +197,19 @@
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="@xpathInner"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <!-- vXpathStopAfter only applies to show="embed" and @xpathStopAfter cannot be used in combination with @xpathInner -->
+        <xsl:variable name="vXpathStopAfter" as="xs:string?">
+            <xsl:choose>
+                <xsl:when test="$vShow != 'embed'"/>
+                <xsl:when test="starts-with(@xpathStopAfter, '#')">
+                    <!-- Colin: fixed Pips code to use @xpathStopAfter in value-of where an id has been selected -->
+                    <xsl:value-of select="concat($gvIdTextStart,substring-after(@xpathStopAfter, '#'),$gvIdTextEnd)"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="@xpathStopAfter"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
@@ -259,6 +273,40 @@
                                                 </xsl:try>
                                             </xsl:for-each>
                                         </xsl:when>
+                                        <xsl:when test="$vXpathStopAfter">
+                                            <xsl:for-each select="$vDocPart">
+                                                <!--<xsl:try>-->
+                                                    <xsl:variable name="vDocStopAfterEl" as="element()*">
+                                                        <xsl:evaluate xpath="$vXpathStopAfter" context-item="."/>
+                                                    </xsl:variable>
+                                                    <xsl:choose>
+                                                        <xsl:when test="$vDocStopAfterEl">
+                                                            <xsl:variable name="vNodesToOutput"
+                                                                select="(
+                                                                    for $n in ($vDocStopAfterEl/ancestor::element()|$vDocStopAfterEl/preceding::element()|$vDocStopAfterEl/descendant::element()) return generate-id($n),
+                                                                    for $n in ($vDocStopAfterEl/preceding::text()|$vDocStopAfterEl/descendant::text()) return generate-id($n),
+                                                                    generate-id($vDocStopAfterEl)
+                                                                )"/>
+                                                            <xsl:variable name="vNodesToNotClose" select="for $n in $vDocStopAfterEl/ancestor::* return generate-id($n)"/>
+                                                            <xsl:apply-templates select=".">
+                                                                <xsl:with-param name="pDocType" select="$vDocType"/>
+                                                                <xsl:with-param  name="pNodesToOutput" select="$vNodesToOutput"/>
+                                                                <xsl:with-param  name="pNodesToNotClose" select="$vNodesToNotClose"/>
+                                                            </xsl:apply-templates>
+                                                        </xsl:when>
+                                                        <xsl:otherwise>
+                                                            <xsl:apply-templates select="$vDocPart">
+                                                                <xsl:with-param name="pDocType" select="$vDocType"/>
+                                                            </xsl:apply-templates>
+                                                            <xsl:message>WARNING: found find included file {$vFilename} and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfter} to stop after so using whole part inside file {$pThisFileUri}</xsl:message>
+                                                        </xsl:otherwise>
+                                                    </xsl:choose>
+                                                    <!--<xsl:catch>
+                                                        <xsl:message>ERROR  {$err:description}: evaluate failed on included file {$vFilename}  and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfter} to stop after inside file {$pThisFileUri}</xsl:message>
+                                                    </xsl:catch>
+                                                </xsl:try>-->
+                                            </xsl:for-each>
+                                        </xsl:when>
                                         <xsl:otherwise>
                                             <xsl:choose>
                                                 <xsl:when test="($vDocType='html') and not($vDocPart/self::*) and not(@addPara='false')">
@@ -319,6 +367,8 @@
         <xsl:param  name="pDocPartSubContent" as="node()*"/>
         <xsl:param  name="pLevel" select="0" as="xs:integer"/>
         <xsl:param  name="pInitialIndent" select="''" as="xs:string"/>
+        <xsl:param  name="pNodesToOutput" select="()" as="xs:string*"/>
+        <xsl:param  name="pNodesToNotClose" select="()" as="xs:string*"/>
         
         <xsl:choose>
             <xsl:when test="$pDocType='html'">
@@ -333,50 +383,64 @@
                 <!-- get the indent of the end element via the whitespace after end of first child -->
                 <xsl:variable name="vInitialIndent" select="replace(*[last()]/following-sibling::text()[self::text()[normalize-space()=''] and (position() = last())],'\n','')" as="xs:string?"/>
                 <xsl:variable name="vSampleXML" as="node()*">
-                    <xsl:call-template name="outputEscapedStartElementName"/>
-                    <xsl:choose>
-                        <xsl:when test="$pDocPartSubContent">
-                            <xsl:text>
-</xsl:text>
-                            <xsl:apply-templates select="$pDocPartSubContent">
-                                <xsl:with-param name="pDocType" select="$pDocType"/>
-                                <xsl:with-param name="pLevel" select="$pLevel + 1"/>
-                                <xsl:with-param name="pInitialIndent" select="$vInitialIndent"/>
-                            </xsl:apply-templates>
-                            <xsl:text>
-</xsl:text>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:apply-templates select="node()">
-                                <xsl:with-param name="pDocType" select="$pDocType"/>
-                                <xsl:with-param name="pLevel" select="$pLevel + 1"/>
-                                <xsl:with-param name="pInitialIndent" select="$vInitialIndent"/>
-                            </xsl:apply-templates>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                    <xsl:call-template name="outputEscapedEndElementName"/>
+                    <xsl:if test="count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)">
+                        <xsl:call-template name="outputEscapedStartElementName"/>
+                        <xsl:choose>
+                            <xsl:when test="$pDocPartSubContent">
+                                <xsl:text>
+    </xsl:text>
+                                <xsl:apply-templates select="$pDocPartSubContent">
+                                    <xsl:with-param name="pDocType" select="$pDocType"/>
+                                    <xsl:with-param name="pLevel" select="$pLevel + 1"/>
+                                    <xsl:with-param name="pInitialIndent" select="$vInitialIndent"/>
+                                </xsl:apply-templates>
+                                <xsl:text>
+    </xsl:text>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:apply-templates select="node()">
+                                    <xsl:with-param name="pDocType" select="$pDocType"/>
+                                    <xsl:with-param name="pLevel" select="$pLevel + 1"/>
+                                    <xsl:with-param name="pInitialIndent" select="$vInitialIndent"/>
+                                    <xsl:with-param name="pNodesToOutput" select="$pNodesToOutput"/>
+                                    <xsl:with-param name="pNodesToNotClose" select="$pNodesToNotClose"/>
+                                </xsl:apply-templates>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                        <xsl:if test="count($pNodesToNotClose) = 0 or not($pNodesToNotClose = generate-id(.))">
+                            <xsl:call-template name="outputEscapedEndElementName"/>
+                        </xsl:if>
+                    </xsl:if>
                 </xsl:variable>
                 <!--<pre>TESTINDENTZ =<xsl:value-of select="string-to-codepoints($vInitialIndent)"/> END</pre>-->
                 <pre xml:space="preserve"><xsl:sequence select="$vSampleXML"/></pre>
             </xsl:when>
             <xsl:otherwise>
-                <!--<xsl:if test="($pLevel=1) and $pInitialIndent != ''">
-                    <!-\- we measured the indent form the first child so we need to add in one tab here
-                        IF there was a start indent-\->
-                    <xsl:text>  </xsl:text>
-                </xsl:if>-->
-                 <xsl:call-template name="outputEscapedStartElementName"/>
-                 <xsl:apply-templates select="node()">
-                     <xsl:with-param name="pDocType" select="$pDocType"/>
-                     <xsl:with-param name="pLevel" select="$pLevel + 1"/>
-                     <xsl:with-param name="pInitialIndent" select="$pInitialIndent"/>
-                 </xsl:apply-templates>
-                 <!--<xsl:if test="($pLevel=1) and ($pInitialIndent != '') and contains(./text()[last()],'&#x09;')">
-                    <!-\- we measured the indent form the first child so we need to add in one tab here
-                    but NOT if the end element is on same line as start element-\->
-                    <xsl:text>  </xsl:text>
-                 </xsl:if>-->
-                 <xsl:call-template name="outputEscapedEndElementName"/>
+                <xsl:if test="count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)">
+                    <!--<xsl:if test="($pLevel=1) and $pInitialIndent != ''">
+                        <!-\- we measured the indent form the first child so we need to add in one tab here
+                            IF there was a start indent-\->
+                        <xsl:text>  </xsl:text>
+                    </xsl:if>-->
+                    <xsl:call-template name="outputEscapedStartElementName"/>
+
+                    <xsl:apply-templates select="node()">
+                        <xsl:with-param name="pDocType" select="$pDocType"/>
+                        <xsl:with-param name="pLevel" select="$pLevel + 1"/>
+                        <xsl:with-param name="pInitialIndent" select="$pInitialIndent"/>
+                        <xsl:with-param name="pNodesToOutput" select="$pNodesToOutput"/>
+                        <xsl:with-param name="pNodesToNotClose" select="$pNodesToNotClose"/>
+                    </xsl:apply-templates>
+
+                     <!--<xsl:if test="($pLevel=1) and ($pInitialIndent != '') and contains(./text()[last()],'&#x09;')">
+                        <!-\- we measured the indent form the first child so we need to add in one tab here
+                        but NOT if the end element is on same line as start element-\->
+                        <xsl:text>  </xsl:text>
+                     </xsl:if>-->
+                    <xsl:if test="count($pNodesToNotClose) = 0 or not($pNodesToNotClose = generate-id(.))">
+                        <xsl:call-template name="outputEscapedEndElementName"/>
+                    </xsl:if>
+                </xsl:if>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
@@ -411,33 +475,36 @@
         <xsl:param  name="pDocType" select="'html'" as="xs:string"/>
         <xsl:param  name="pLevel" select="0" as="xs:integer"/>
         <xsl:param  name="pInitialIndent" select="''" as="xs:string"/>
+        <xsl:param  name="pNodesToOutput" select="()" as="xs:string*"/>
         <!--<xsl:variable name="vSmallerIndent" select="substring($pInitialIndent,1,string-length($pInitialIndent)-1)" as="xs:string?"/>-->
         <xsl:choose>
             <xsl:when test="$pDocType='html'">
                 <xsl:value-of select="."/>
             </xsl:when>
             <xsl:otherwise>
-                <span class="tT">
-                    <xsl:variable name="vValue" as="xs:string?">
-                        <xsl:choose>
-                            <xsl:when test="($pInitialIndent != '') and starts-with(.,$pInitialIndent)">
-                                <!--<test t="1" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
-                                <xsl:value-of select="replace(.,concat('^',$pInitialIndent,'(.*)'),'$1')"/>
-                            </xsl:when>
-                            <xsl:when test="($pInitialIndent != '') and ends-with(.,$pInitialIndent)">
-                                <!--<test t="2" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
-                                <xsl:value-of select="replace(.,concat('(.*)',$pInitialIndent,'$'),'$1')"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <!--<test t="5" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}" vSmallerIndent="{string-to-codepoints($vSmallerIndent)}"/>-->
-                                <!--  do not use style="white-space:normal" loses indent as all space collapsed to one space -->
-                                <xsl:value-of select="."/>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:variable>
-                    <!-- to stop indents getting too big, swap tabs for two spaces -->
-                    <xsl:value-of select="replace($vValue,'\t','  ')"/>
-                </span>
+                <xsl:if test="count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)">
+                    <span class="tT">
+                        <xsl:variable name="vValue" as="xs:string?">
+                            <xsl:choose>
+                                <xsl:when test="($pInitialIndent != '') and starts-with(.,$pInitialIndent)">
+                                    <!--<test t="1" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
+                                    <xsl:value-of select="replace(.,concat('^',$pInitialIndent,'(.*)'),'$1')"/>
+                                </xsl:when>
+                                <xsl:when test="($pInitialIndent != '') and ends-with(.,$pInitialIndent)">
+                                    <!--<test t="2" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}"/>-->
+                                    <xsl:value-of select="replace(.,concat('(.*)',$pInitialIndent,'$'),'$1')"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <!--<test t="5" this="{.}" pInitialIndent="{string-to-codepoints($pInitialIndent)}" vSmallerIndent="{string-to-codepoints($vSmallerIndent)}"/>-->
+                                    <!--  do not use style="white-space:normal" loses indent as all space collapsed to one space -->
+                                    <xsl:value-of select="."/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:variable>
+                        <!-- to stop indents getting too big, swap tabs for two spaces -->
+                        <xsl:value-of select="replace($vValue,'\t','  ')"/>
+                    </span>
+                </xsl:if>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
