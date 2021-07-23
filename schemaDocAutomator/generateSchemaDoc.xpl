@@ -7,7 +7,7 @@
     xmlns:xh="http://www.w3.org/1999/xhtml" version="1.0">
   
   <p:documentation>
-    <h:p>Top-level XProc script to run to produce schem documentation.</h:p>
+    <h:p>Top-level XProc script to run to produce schema documentation.</h:p>
     <h:p>Prepares schemas, ingests mapped content and Generates HTML schema documentation using Oxygen.</h:p>
     <h:p>Script will:</h:p>
     <h:ul>
@@ -37,6 +37,7 @@
       <h:li>pUserGuide - the name of the user guide skeleton XHTML to be processed after the reference guide has been created. This is also the filename that the final HTML output file for the user guide will use. If this is empty then no user guide will be processed and no link to the user guide created in the reference guide navigation.</h:li>
       <h:li>pOxySettingsFilename - the name of the Oxygen XSD generation settings file.</h:li>
       <h:li>pOxygenOutputFolder - the URI of the folder to which Oxygen output will be written (note: this folder is cleaned out at the start of processing)</h:li>
+      <h:li>pOxygenPath - the location of Oxygen on your installation (used for calling the Oxygen v21 program to generate schema diagrams and TML documentation) </h:li>
       <h:li>pOutputFolder - the URI of the folder to which the final output will be written by this script (note: this folder is cleaned out at the start of processing)</h:li>
     </h:ul>
     <h:h1>Other Configuration</h:h1>
@@ -69,6 +70,7 @@
   <p:option required="false" name="pOutputFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/finalOutput'"/>
   
   <p:option required="false" name="pOxySettingsFilename" select="'oxygenSettings.xml'"/>
+  <p:option required="false" name="pOxygenPath" select="'file:/C:/Program Files/Oxygen XML Editor 21'"/>
   
   <p:option required="false" name="pGenerateConfigIDpara" select="'false'"/>
 
@@ -130,6 +132,7 @@
       <p:with-option name="pUserGuide" select="$pUserGuide"/>
       <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
       <p:with-option name="pOxygenOutputFolder" select="$pOxygenOutputFolder"/>
+      <p:with-option name="pOxygenPath" select="$pOxygenPath"/>
       <p:with-option name="pOxySettingsFilename" select="$pOxySettingsFilename"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
     </cm:generateHTMLdoc>

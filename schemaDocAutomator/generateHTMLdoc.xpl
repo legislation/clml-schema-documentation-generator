@@ -33,6 +33,7 @@
     <p:option required="true" name="pReferenceGuide"/>
     <p:option required="true" name="pOxygenOutputFolder"/>
     <p:option required="true" name="pOxySettingsFilename"/>
+    <p:option required="true" name="pOxygenPath"/>
     <p:option required="true" name="pOutputFolder"/>
     
     <p:import href="library-1.0.xpl"/>
@@ -45,9 +46,12 @@
         <p:variable name="vInputSchemaFileNoExt" select="substring-before($pInputSchemaFile,'.')"/>
         <p:variable name="vInputFolderWinPath" select="replace(concat(substring-after($pTempFolder,'file:/'),'/xsd/',$vInputSchemaFileNoExt,'.xsd'),'/','\\')"/>
         <p:variable name="vOutputFolderWinPath" select="replace(substring-after($pOxygenOutputFolder,'file:/'),'/','\\')"/>
+        <p:variable name="vOxygenPath" select="replace(substring-after($pOxygenPath,'file:/'),'/','\\')"/>
+        <p:variable name="vQuote" select='""""'/>
+        <p:variable name="vOxygenPathQuotes" select='concat($vQuote,$vOxygenPath,$vQuote)'/>
         <p:variable name="vSettingsFolderWinPath" select="replace($pWorkingDirectoryPath,'/','\\')"/>
         <p:variable name="vSettingsTempFilename" select="concat(replace(substring-before(xs:string(current-dateTime()),'.'),':',''),'.xml')"/>
-        <p:variable name="vOxyArgs" select="concat('/C CALL launchOxygen.bat ',$vInputFolderWinPath,' -cfg:',$vSettingsFolderWinPath,'\',$vSettingsTempFilename)"/>
+        <p:variable name="vOxyArgs" select="concat('/C CALL launchOxygen.bat ',$vInputFolderWinPath,' -cfg:',$vSettingsFolderWinPath,'\',$vSettingsTempFilename,' ',$vOxygenPathQuotes)"/>
          
       <!-- using an exported settings file is handy and makes it easy for people to configure,
           however the filename/path is stored in the file as
@@ -60,6 +64,9 @@
           <p:load>
             <p:with-option name="href" select="$pOxySettingsFilename"/>
           </p:load>
+          <!--<cx:message>
+            <p:with-option name="message" select="concat('!!!! vOxygenPathQuotes ',$vOxygenPathQuotes, ' vOxyArgs ', $vOxyArgs)"/>
+          </cx:message>-->
           <p:string-replace match="/serialized/serializableOrderedMap/entry/xsdDocumentationOptions/field[@name='unexpandedOutputFile']/String/text()">
             <p:with-option name="replace" select="concat('&quot;',$pOxygenOutputFolder,'/',$pReferenceGuide,'&quot;')"/>
           </p:string-replace>
@@ -72,7 +79,7 @@
             <p:exec name="xsd2html" command="cmd.exe" source-is-xml="false" result-is-xml="false" cx:show-stderr="true">
               <p:with-option name="cwd" select="$pWorkingDirectoryPath"/>
               <p:with-option name="args" select="$vOxyArgs"/>
-                <p:input port="source"><p:empty/></p:input>
+              <p:input port="source"><p:empty/></p:input>
             </p:exec>
             <p:sink/>
           
