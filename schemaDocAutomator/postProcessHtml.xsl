@@ -35,7 +35,9 @@
         <!--<xsl:message>END Processing {base-uri(.)}</xsl:message>-->
     </xsl:template>
     
-     <xsl:template match="script">
+    <xsl:template match="comment()"/>
+
+    <xsl:template match="script">
         <xsl:copy-of select="."/>
     </xsl:template>
     
@@ -68,29 +70,21 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:template match="h1">
-        <h1>
-            <xsl:attribute name="id" select="generate-id()"/>
+    <xsl:template match="div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5]">
+        <xsl:copy>
+            <xsl:attribute name="id">
+              <xsl:apply-templates select="." mode="generate-slug"/>
+            </xsl:attribute>
             <!-- overwrite with original id if it has one -->
             <xsl:copy-of select="@*"/>
-            <!-- set the class to reflect depth -->
-            <xsl:if test="../self::div[@class='section'] and not(@class)">
-                <xsl:attribute name="class">
-                    <xsl:if test="@class">
-                        <xs:value-of select="concat(@class,' ')"/>
-                    </xsl:if>
-                    <xsl:text>level-</xsl:text>
-                    <xsl:value-of select="count(ancestor::div[@class='section'])"/>
-                </xsl:attribute>
-            </xsl:if>
             <xsl:apply-templates/>
-        </h1>
+        </xsl:copy>
     </xsl:template>
     
     <!-- manipulate toc to pull list of elements to the top as its what most users will want 
     home.indexListns.html-->
     <xsl:template match="div[cm:isElementListContainer(.)]" priority="+1">
-        <xsl:variable name="vElementToc" select="div[cm:isElementToc(.)]" as="element()?"/>
+        <xsl:variable name="vElementToc" select="./div[cm:isElementToc(.)]" as="element()?"/>
         <xsl:copy>
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates select="$vElementToc"/>

@@ -14,9 +14,9 @@
      <h:li>convert from RNG (if source is specified as RNG in param) using Trang (this will have to be tailored to final RNG structure and costume annotations when available))</h:li>
      <h:li>It will then pull comments form RNG into XSD as these are not kept in all cases (and any custom or xhtml elements are lost) when Trang is run</h:li>
      <h:li>manipulate XSD comments and pull in custom include link references to other content by looking up fixed or auto-generated schema ids in a map file</h:li>
-     <h:li>Run oxygen script with configured settings to create XHTML plus navigation images</h:li>
+     <h:li>Run oXygen script with configured settings to create XHTML plus navigation images</h:li>
      <h:li>Post process the XHTML to resolve custom includes and to manipulate frame and navigation</h:li>
-     <h:li>Post process will also optionally process any user guide file (passed as a parameter) including any contents and generating a table of contents from <h:code>h1</h:code> headings of divs, where a <h:code>ci:toc</h:code> element is found.</h:li>
+     <h:li>Post process will also optionally process any user guide file (passed as a parameter) including any contents and generating a table of contents from <h:code>h2</h:code>–<h:code>h5</h:code> headings of divs, where a <h:code>ci:toc</h:code> element is found.</h:li>
     </h:ul>
     <h:p>For a description of the HTML manipulation please refer to the documentation in "postProcessHTML.xslt"</h:p>
     <h:p>For a description of the custom include mechanism, its attributes and the id map file please refer to the documentation in "processIncludes.xsl"</h:p>
@@ -42,7 +42,7 @@
     </h:ul>
     <h:h1>Other Configuration</h:h1>
     <h:p>This software has been tested with oXygen XML Editor 21.0, build 2019022207</h:p>
-    <h:p>As the XSLT is XSLT3, a suitable version of Saxon is required. As the XSLTs use the <code>xsl:evaluate</code> element then a Porfessional (PE) version or Enterprise (EE) version or any version after v10 is required.</h:p>
+    <h:p>As the XSLT is XSLT3, a suitable version of Saxon is required. As the XSLTs use the <code>xsl:evaluate</code> element then a Professional (PE) version or Enterprise (EE) version or any version after v10 is required.</h:p>
     <h:p>If the Oxygen schema documentation is to be run in a scheduled automatic fashion then a script licence is required. see <a href="https://www.oxygenxml.com/oxygen_scripting.html">https://www.oxygenxml.com/oxygen_scripting.html</a>.</h:p>
     <h:p><h:b>The launchOxygen.bat and trang.bat files must be edited so that the paths used internally are correct for the deployed environment.</h:b></h:p>
   </p:documentation>

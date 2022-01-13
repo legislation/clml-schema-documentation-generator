@@ -37,7 +37,8 @@
               <li><code>cm:getAnnotationsFromId(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this performs the same role as above but uses the html id for the component that you want the annotation of (useful where the title is not simply the element/attribute/group name) e.g. <code>href="schemaLegislationMetadata_xsd.html" xpath="cm:getAnnotationsFromId(.,'AlternativeNumber_Value')"</code></li>
             </ul>
           </li>
-          <li><code>xpathInner</code> - describes which <b>subset</b> of the <code>xpath</code> content (if the content is well-formed HTML or XML) should be included using the standard XPath format when embedding content. This is useful if you wanted to show the context of an element but not include all of its contents e.g. xpath="/*:Legislation/*:Metadata/*:SecondaryMetadata" xpathInner="*:Year|*:Number" will output the SecondaryMetadata element start and end but only output the Year and/or Number within it. If this attribute is used and <code>@fileref</code> is turned on the an extra paragraph is generated indicating that it is a partial sample.</li>
+          <li><code>xpathInner</code> - describes which <b>subset</b> of the <code>xpath</code> content (if the content is well-formed HTML or XML) should be included using the standard XPath format when embedding content. This is useful if you wanted to show the context of an element but not include all of its contents e.g. <code>xpath="/*:Legislation/*:Metadata/*:SecondaryMetadata" xpathInner="*:Year|*:Number"</code> will output the SecondaryMetadata element start and end but only output the Year and/or Number within it. If this attribute is used and <code>@fileref</code> is turned on the an extra paragraph is generated indicating that it is a partial sample. Cannot be used with <code>xPathStopAfter</code>.</li>
+          <li><code>xpathStopAfter</code> - describes the descendant of the <code>xpath</code> content after which no more content will be included, using the standard XPath format. This is useful if you wanted to show the context of an element but not include all of its contents e.g. <code>xpath="/*:Legislation/*:Metadata/*:SecondaryMetadata" xpathStopAfter="*:Number"</code> will output the SecondaryMetadata element start and all the elements up to Number, but none of the content afterwards (including any following closing tags). If this attribute is used and <code>@fileref</code> is turned on the an extra paragraph is generated indicating that it is a partial sample. Cannot be used with <code>xPathInner</code>.</li>
         </ul>
         <p>Any other attributes will be passed through to the HTML.</p>
         <p>This module also supports the generation a table of contents from <code>h1</code> headings of divs, where a <code>ci:toc</code> element is found.</p>
@@ -101,11 +102,18 @@
         </attribute>
       </optional>
       <optional>
-        <attribute name="xpathInner">
-          <data type="token">
-            <param name="minLength">1</param>
-          </data>
-        </attribute>
+        <choice>
+          <attribute name="xpathInner">
+            <data type="token">
+              <param name="minLength">1</param>
+            </data>
+          </attribute>
+          <attribute name="xpathStopAfter">
+            <data type="token">
+              <param name="minLength">1</param>
+            </data>
+          </attribute>
+        </choice>
       </optional>
       <optional>
         <ref name="class.attrib"/>

@@ -5,8 +5,8 @@
     xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:err="http://www.w3.org/2005/xqt-errors"
     xmlns:ci="http://macksol.co.uk/include" xmlns:xhtml="http://www.w3.org/1999/xhtml"
     xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://www.w3.org/1999/xhtml" 
-	xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:leg="http://www.legislation.gov.uk/namespaces/legislation"
-	xmlns:ukm="http://www.legislation.gov.uk/namespaces/metadata"
+    xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:leg="http://www.legislation.gov.uk/namespaces/legislation"
+    xmlns:ukm="http://www.legislation.gov.uk/namespaces/metadata"
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
     exclude-result-prefixes="xs a rng cm ci err xhtml ukm dc leg" expand-text="true"
     version="3.0">
@@ -51,7 +51,7 @@
         <p>Any other attributes will be passed through to the HTML.</p>
         <p>This module also supports the generation a table of contents from <code>h1</code> headings of divs, where a <code>ci:toc</code> element is found.</p>
         <h1>id map file</h1>
-        <p>While it is possible for schema developers to manually insert custom include elements inside the schema xs:documentation elements, it is easier to manage these (and keeps the schema annotations brief) if the custm includes are automatically injected via the id map file.</p>
+        <p>While it is possible for schema developers to manually insert custom include elements inside the schema xs:documentation elements, it is easier to manage these (and keeps the schema annotations brief) if the custom includes are automatically injected via the id map file.</p>
         <p>When the code in genMoveAnnotations.xslt processes a schema element or attribute, it gathers the schema components' id. If the id attribute is present on the schema component then it is used otherwise an id is calculated based on the schema filename, the type of component and the component name (e.g. "schemaLegislationMetadata-E-AlternativeNumber").</p>
         <p>This id is then used as a key to a look-up in the id mapping file (finds an entry element in no namespace with the same id attribute) and all child custom include elements (or any other elements) are then included and processed. e.g. </p>
         <pre xml:space="preserve">
@@ -71,6 +71,17 @@
     <xsl:param name="gpOutputFolder" as="xs:string"/>
     <xsl:param name="gpSchemaIdMap" select="'schemaId2doc.map'" as="xs:string"/>
     <xsl:variable name="gvIdMap" select="document(concat($gpExtraDocFolder,'/',$gpSchemaIdMap))/*:idmap/*:entry" as="element()*"/>
+
+    <xsl:key name="kId" match="(//div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5]|//*[@id])">
+        <xsl:choose>
+            <xsl:when test="self::h2 or self::h3 or self::h4 or self::h5">
+                <xsl:sequence select="leg:generateSectionIdRecursive(ancestor::div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5])"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:sequence select="@id"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:key>
     
     <xsl:variable name="gvIdTextStart" as="xs:string">
         <xsl:text>.//*[@*:id='</xsl:text>
@@ -81,20 +92,68 @@
     
     <!-- ======== generate a Toc =========== -->
     <xsl:template match="ci:toc" priority="+1">
-       <div class="contents" id="contents">
-           <h1>Contents</h1>
-            <xsl:apply-templates select="ancestor::body" mode="toc"/>
-       </div>
+       <nav class="contents" id="contents">
+           <h2>Contents</h2>
+           <ul class="toc-1">
+             <xsl:apply-templates select="ancestor::body//h2" mode="toc"/>
+           </ul>
+       </nav>
     </xsl:template>
     
     <xsl:template match="ci:toc" mode="toc"/>
     
-    <xsl:template match="div[@class='section']/h1" mode="toc">
-        <p class="toc-{count(ancestor::div[@class='section'])}">
-            <a href="#{if (@id) then @id else generate-id()}">
+    <xsl:template match="div[@class = 'section']/*[self::h2 or self::h3 or self::h4 or self::h5]" mode="toc">
+        <xsl:variable name="this-level" select="local-name()"/>
+        <xsl:variable name="next-level" select="concat('h', string(xs:integer(substring(local-name(), 2, 1)) + 1))"/>
+        <li>
+            <a>
+                <xsl:attribute name="href">
+                    <xsl:text>#</xsl:text>
+                    <xsl:choose>
+                        <xsl:when test="@id"><xsl:value-of select="@id"/></xsl:when>
+                        <xsl:otherwise><xsl:apply-templates select="." mode="generate-slug"/></xsl:otherwise>
+                    </xsl:choose>
+                </xsl:attribute>
                 <xsl:value-of select="."/>
             </a>
-        </p>
+            <xsl:variable name="following-children" select="following::*[local-name() = $next-level and parent::div[@class = 'section']] except following::*[local-name() = $this-level and parent::div[@class = 'section']]/following::*"/>
+            <xsl:if test="not(empty($following-children)) and not($this-level = 'h5')">
+                <xsl:text>&#10;</xsl:text>
+                <ul class="toc-{string(xs:integer(substring(local-name(), 2, 1)))}">
+                    <xsl:apply-templates select="$following-children" mode="toc"/>
+                </ul>
+            </xsl:if>
+        </li>
+    </xsl:template>
+
+    <xsl:template match="h2 | h3 | h4 | h5" mode="generate-slug">
+        <xsl:iterate select="reverse(ancestor::div[@class = 'section']/(h2 | h3 | h4 | h5) except following::*)">
+            <xsl:param name="previous-set" select="()"/>
+            <xsl:on-completion>
+                <xsl:message terminate="yes">
+                    <xsl:text>ERROR: Couldn't generate an ID for </xsl:text>
+                    <xsl:value-of select="path($previous-set[last()])"/>
+                    <xsl:text> that didn't conflict. The conflicting elements are: &#13;&#10;</xsl:text>
+                    <xsl:value-of select="key('kId', leg:generateSectionId($previous-set))/concat('   ', path(), '&#13;&#10;')"/>
+                    <xsl:text>Please change any conflicting IDs or heading names.</xsl:text>
+                </xsl:message>
+            </xsl:on-completion>
+            <xsl:variable name="current-set" select="(., $previous-set)"/>
+            <xsl:variable name="slug" select="leg:generateSectionId($current-set)"/>
+            <xsl:choose>
+                <xsl:when test="count(key('kId', $slug) except following::*) lt 2">
+                    <!--<xsl:message>Emitting slug <xsl:sequence select="$slug"/> for <xsl:value-of select="local-name()"/> "<xsl:value-of  select="string()"/>"</xsl:message>-->
+                    <xsl:sequence select="$slug"/>
+                    <xsl:break/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <!--<xsl:message>Slug <xsl:sequence select="$slug"/> for <xsl:value-of select="local-name()"/> "<xsl:value-of select="string()"/>" conflicts, retrying</xsl:message>-->
+                    <xsl:next-iteration>
+                        <xsl:with-param name="previous-set" select="$current-set"/>
+                    </xsl:next-iteration>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:iterate>
     </xsl:template>
     
     <!--======= insert date automatically ===========-->
@@ -201,7 +260,7 @@
             </xsl:choose>
         </xsl:variable>
         <!-- vXpathStopAfter only applies to show="embed" and @xpathStopAfter cannot be used in combination with @xpathInner -->
-        <xsl:variable name="vXpathStopAfter" as="xs:string?">
+        <xsl:variable name="vXpathStopAfterSelector" as="xs:string?">
             <xsl:choose>
                 <xsl:when test="$vShow != 'embed'"/>
                 <xsl:when test="starts-with(@xpathStopAfter, '#')">
@@ -213,7 +272,18 @@
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <xsl:message>Need to {$vShow} {$vFilename} with selection {$vXpath} and optionally contents of {$vXpathInsideSelector} inside file {$pThisFileUri}</xsl:message>
+        <xsl:message>
+          <xsl:text>Need to {$vShow} {$vFilename} with selection {$vXpath} </xsl:text>
+          <xsl:choose>
+            <xsl:when test="$vXpathInsideSelector">
+              <xsl:text>and optionally contents of {$vXpathInsideSelector} </xsl:text>
+            </xsl:when>
+            <xsl:when test="$vXpathStopAfterSelector">
+              <xsl:text>and optionally stopping at {$vXpathStopAfterSelector} </xsl:text>
+            </xsl:when>
+          </xsl:choose>
+          <xsl:text>inside file {$pThisFileUri}</xsl:text>
+        </xsl:message>
         <xsl:choose>
             <xsl:when test="$vShow = 'showimage'">
                 <img src="{$vFilename}">
@@ -273,11 +343,11 @@
                                                 </xsl:try>
                                             </xsl:for-each>
                                         </xsl:when>
-                                        <xsl:when test="$vXpathStopAfter">
+                                        <xsl:when test="$vXpathStopAfterSelector">
                                             <xsl:for-each select="$vDocPart">
                                                 <!--<xsl:try>-->
                                                     <xsl:variable name="vDocStopAfterEl" as="element()*">
-                                                        <xsl:evaluate xpath="$vXpathStopAfter" context-item="."/>
+                                                        <xsl:evaluate xpath="$vXpathStopAfterSelector" context-item="."/>
                                                     </xsl:variable>
                                                     <xsl:choose>
                                                         <xsl:when test="$vDocStopAfterEl">
@@ -298,7 +368,7 @@
                                                             <xsl:apply-templates select="$vDocPart">
                                                                 <xsl:with-param name="pDocType" select="$vDocType"/>
                                                             </xsl:apply-templates>
-                                                            <xsl:message>WARNING: found find included file {$vFilename} and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfter} to stop after so using whole part inside file {$pThisFileUri}</xsl:message>
+                                                            <xsl:message>WARNING: found find included file {$vFilename} and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfterSelector} to stop after so using whole part inside file {$pThisFileUri}</xsl:message>
                                                         </xsl:otherwise>
                                                     </xsl:choose>
                                                     <!--<xsl:catch>
@@ -352,7 +422,7 @@
                     <xsl:otherwise>{tokenize($vFilename,'/')[last()]}</xsl:otherwise>
                 </xsl:choose>
             </p>
-            <xsl:if test="$vXpathInsideSelector">
+        <xsl:if test="$vXpathInsideSelector or $vXpathStopAfterSelector">
                 <p class="fileref">
                     <b>Note:</b>
                     <xs:text> The content of this element has been reduced to make the example clearer.</xs:text>
@@ -545,5 +615,24 @@
     <xsl:function name="cm:getAnnotationFromTable" as="node()*" visibility="public">
         <xsl:param name="pContextNode" as="node()"/>
         <xsl:sequence select="$pContextNode//div[starts-with(@id,'annotations')]/div[@class='annotation']/node()"/>   
+    </xsl:function>
+
+    <xsl:function name="leg:createIdFromText" as="xs:string" visibility="public">
+      <xsl:param name="pInput" as="xs:string"/>
+      <xsl:sequence select="replace(replace(normalize-space(replace(lower-case($pInput), '(\s|_|-|–|—|:|;|,|\?|!|/|&amp;)+', ' ')), ' ', '-'), '[^a-z0-9\-]', '')"/>
+    </xsl:function>
+
+    <xsl:function name="leg:generateSectionId" as="xs:string" visibility="public">
+      <xsl:param name="pNodes" as="element()+"/>
+      <xsl:variable name="result" select="string-join($pNodes/leg:createIdFromText(.)[normalize-space()], '-')[normalize-space()]"/>
+      <!--<xsl:message><xsl:text>Generating slug for </xsl:text><xsl:sequence select="concat('(', string-join($pNodes/string(), ','), ')')"/><xsl:text> yields </xsl:text><xsl:sequence select="$result"/></xsl:message>-->
+      <xsl:sequence select="$result"/>
+    </xsl:function>
+
+    <xsl:function name="leg:generateSectionIdRecursive" as="xs:string*" visibility="public">
+      <xsl:param name="pNodes" as="element()*"/>
+      <xsl:variable name="result" select="if ($pNodes) then (leg:generateSectionId($pNodes), leg:generateSectionIdRecursive($pNodes[position() gt 1])) else ()"/>
+      <!--<xsl:message><xsl:text>Generating slug recursively for </xsl:text><xsl:sequence select="concat('(', string-join($pNodes/string(), ','), ')')"/><xsl:text> yields </xsl:text><xsl:sequence select="$result"/></xsl:message>-->
+      <xsl:sequence select="$result"/>
     </xsl:function>
 </xsl:stylesheet>
