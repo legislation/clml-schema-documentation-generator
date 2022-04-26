@@ -116,6 +116,13 @@
         </choice>
       </optional>
       <optional>
+        <attribute name="xpathExclude">
+          <data type="token">
+            <param name="minLength">1</param>
+          </data>
+        </attribute>
+      </optional>
+      <optional>
         <ref name="class.attrib"/>
       </optional>
       <optional>

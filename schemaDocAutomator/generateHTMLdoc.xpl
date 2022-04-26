@@ -35,23 +35,40 @@
     <p:option required="true" name="pOxySettingsFilename"/>
     <p:option required="true" name="pOxygenPath"/>
     <p:option required="true" name="pOutputFolder"/>
+    <p:option required="true" name="pAdditionalHtmlSubFolder"/>
     
     <p:import href="library-1.0.xpl"/>
     <p:import href="getFolderList.xpl"/>
+    <p:import href="copyFiles.xpl"/>
     
     <p:load name="postProcessHtmlXSLT" href="postProcessHtml.xsl"/>
     <p:sink/>
     
     <p:group>
+        <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility -->
         <p:variable name="vInputSchemaFileNoExt" select="substring-before($pInputSchemaFile,'.')"/>
-        <p:variable name="vInputFolderWinPath" select="replace(concat(substring-after($pTempFolder,'file:/'),'/xsd/',$vInputSchemaFileNoExt,'.xsd'),'/','\\')"/>
-        <p:variable name="vOutputFolderWinPath" select="replace(substring-after($pOxygenOutputFolder,'file:/'),'/','\\')"/>
+        <p:variable name="vInputFolderWinPath" select="concat(substring-after($pTempFolder,'file:/'),'/xsd/',$vInputSchemaFileNoExt,'.xsd')"/>
+        <p:variable name="vOutputFolderWinPath" select="substring-after($pOxygenOutputFolder,'file:/')"/>
+      
+        <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility
         <p:variable name="vOxygenPath" select="replace(substring-after($pOxygenPath,'file:/'),'/','\\')"/>
-        <p:variable name="vQuote" select='""""'/>
+        <p:variable name="vSettingsFolderWinPath" select="replace($pWorkingDirectoryPath,'/','\\')"/> -->
+        <p:variable name="vOxygenPath" select="substring-after($pOxygenPath,'file:/')"/>
+        <p:variable name="vSettingsFolderWinPath" select="$pWorkingDirectoryPath"/>
+        
+        <!-- PA 11/3/22 - the XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
+          (see https://www.w3.org/TR/xproc/#c.exec) - using multiple quotes here was breaking paths with spaces on my machine -->
+        <p:variable name="vQuote" select="'&quot;'"/>
+        <p:variable name="vTab" select="'&#9;'"/>
         <p:variable name="vOxygenPathQuotes" select='concat($vQuote,$vOxygenPath,$vQuote)'/>
-        <p:variable name="vSettingsFolderWinPath" select="replace($pWorkingDirectoryPath,'/','\\')"/>
         <p:variable name="vSettingsTempFilename" select="concat(replace(substring-before(xs:string(current-dateTime()),'.'),':',''),'.xml')"/>
-        <p:variable name="vOxyArgs" select="concat('/C CALL launchOxygen.bat ',$vInputFolderWinPath,' -cfg:',$vSettingsFolderWinPath,'\',$vSettingsTempFilename,' ',$vOxygenPathQuotes)"/>
+      
+        <!-- PA 11/3/22 - changing launchOxygen script call to enable cross-platform compatibility
+          The XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
+          (see https://www.w3.org/TR/xproc/#c.exec) so using the tab character as a separator instead - note that we have to concat together
+          strings that should be part of the *same* argument
+        <p:variable name="vOxyArgs" select="string-join(('/C', 'CALL', 'launchOxygen.bat', $vInputFolderWinPath, concat('-cfg:', $vSettingsFolderWinPath, '/',$vSettingsTempFilename),$vOxygenPathQuotes), $vTab)"/>  -->
+        <p:variable name="vOxyArgs" select="string-join(($vInputFolderWinPath, concat('-cfg:', $vSettingsFolderWinPath, '/',$vSettingsTempFilename),$vOxygenPathQuotes), $vTab)"/>
          
       <!-- using an exported settings file is handy and makes it easy for people to configure,
           however the filename/path is stored in the file as
@@ -64,9 +81,9 @@
           <p:load>
             <p:with-option name="href" select="$pOxySettingsFilename"/>
           </p:load>
-          <!--<cx:message>
+          <cx:message>
             <p:with-option name="message" select="concat('!!!! vOxygenPathQuotes ',$vOxygenPathQuotes, ' vOxyArgs ', $vOxyArgs)"/>
-          </cx:message>-->
+          </cx:message>
           <p:string-replace match="/serialized/serializableOrderedMap/entry/xsdDocumentationOptions/field[@name='unexpandedOutputFile']/String/text()">
             <p:with-option name="replace" select="concat('&quot;',$pOxygenOutputFolder,'/',$pReferenceGuide,'&quot;')"/>
           </p:string-replace>
@@ -76,12 +93,41 @@
         </p:group>
         <!--<p:try>-->
           <p:group>
-            <p:exec name="xsd2html" command="cmd.exe" source-is-xml="false" result-is-xml="false" cx:show-stderr="true">
-              <p:with-option name="cwd" select="$pWorkingDirectoryPath"/>
-              <p:with-option name="args" select="$vOxyArgs"/>
-              <p:input port="source"><p:empty/></p:input>
-            </p:exec>
-            <p:sink/>
+            <!-- PA 11/3/22 - changing launchOxygen script call to enable cross-platform compatibility -->
+            <p:try name="xsd2html">
+              <p:group>
+                <p:output port="result"><p:pipe port="result" step="xsd2htmlwin"/></p:output>
+                <p:exec name="xsd2htmlwin" source-is-xml="false" result-is-xml="false">
+                  <p:with-option name="command" select="'cmd.exe'"/>
+                  <p:with-option name="cwd" select="$pWorkingDirectoryPath"/>
+                  <p:with-option name="args" select="string-join(('/C','CALL','launchOxygen.bat',$vOxyArgs), $vTab)"/>
+                  <p:with-option name="arg-separator" select="$vTab"/>
+                  <p:input port="source"><p:empty/></p:input>
+                </p:exec>
+              </p:group>
+              <p:catch>
+                <p:output port="result"><p:pipe port="result" step="xsd2htmlother"/></p:output>
+                <p:exec name="xsd2htmlother" source-is-xml="false" result-is-xml="false">
+                  <p:with-option name="command" select="'launchOxygen.sh'"/>
+                  <p:with-option name="cwd" select="$pWorkingDirectoryPath"/>
+                  <p:with-option name="args" select="$vOxyArgs"/>
+                  <p:with-option name="arg-separator" select="$vTab"/>
+                  <p:input port="source"><p:empty/></p:input>
+                </p:exec>
+              </p:catch>
+            </p:try>
+            <!-- PA 11/3/22 - outputting the stdout using cx:message makes it easier to debug -->
+            <cx:message>
+              <p:with-option name="message" select=".">
+                <p:pipe port="result" step="xsd2html"/>
+              </p:with-option>
+            </cx:message>
+            
+            <!-- PA 9/3/22 Copy any supporting HTML files into the intermediate output folder -->
+            <cm:copyFiles>
+              <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pAdditionalHtmlSubFolder)"/>
+              <p:with-option name="pOutputFolder" select="$pOxygenOutputFolder"/>
+            </cm:copyFiles>
           
             <cm:getFolderList>
               <p:with-option name="pFolderPath" select="$pOxygenOutputFolder"/>

@@ -40,7 +40,7 @@
         <p:filter select="//*:file"/> 
         <p:for-each name="iterateHTML" >
           <p:variable name="vFilename" select="/*/@relname"/>
-          <cxf:copy fail-on-error="false">
+          <cxf:copy fail-on-error="true"><!-- PA 9/3/2022 copy failure should trigger error -->
               <p:with-option name="href" select="concat($pInputFolder, '/', $vFilename)"/>
               <p:with-option name="target" select="concat($pOutputFolder,'/', $vFilename)"/>
           </cxf:copy>

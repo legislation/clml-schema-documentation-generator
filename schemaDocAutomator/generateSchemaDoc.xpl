@@ -59,6 +59,7 @@
   <p:option required="false" name="pInputSchemaFile" select="'schema/legislation.xsd'"/>
   <p:option required="false" name="pExtraDocFolder" select="'file:/C:/Users/colin/unified-master-schema/schemaDoc/CLMLfiles/extraDocFolder'"/>
   <p:option required="false" name="pHtmlAssetsSubFolder" select="'img'"/>
+  <p:option required="false" name="pAdditionalHtmlSubFolder" select="'html'"/> <!-- PA 9/3/22 support including additional HTML files -->
   <p:option required="false" name="pSampleXmlFolder" select="'file:/C:/Users/colin/unified-master-schema/schemaDoc/CLMLfiles/sampleXML'"/>
   <p:option required="false" name="pSchemaMapFile" select="'schemaId2doc.map'"/>
   <p:option required="false" name="pReferenceGuide" select="'CLMLreferenceGuide-v2-2.html'"/>
@@ -135,6 +136,7 @@
       <p:with-option name="pOxygenPath" select="$pOxygenPath"/>
       <p:with-option name="pOxySettingsFilename" select="$pOxySettingsFilename"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
+      <p:with-option name="pAdditionalHtmlSubFolder" select="$pAdditionalHtmlSubFolder"/>
     </cm:generateHTMLdoc>
      
     <!-- now process the user guide-->

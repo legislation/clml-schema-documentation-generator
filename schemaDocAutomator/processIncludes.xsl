@@ -43,10 +43,13 @@
               <li><code>cm:getImageFromId(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this performs the same role as above but uses the html id for the component that you want the structure image of (useful where the title is not simply the element/attribute/group name)</li>
               <li><code>cm:getAnnotationsFromTitle(contextNode, titleOfComponentInGeneratedDocumentation)</code> - e.g. to get the HTML annotation content of the "Year" element we would use <code>href="schemaLegislationMetadata_xsd.html" xpath="cm:getAnnotationsFromTitle(.,'Year')"</code></li>
               <li><code>cm:getAnnotationsFromId(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this performs the same role as above but uses the html id for the component that you want the annotation of (useful where the title is not simply the element/attribute/group name) e.g. <code>href="schemaLegislationMetadata_xsd.html" xpath="cm:getAnnotationsFromId(.,'AlternativeNumber_Value')"</code></li>
+              <li><code>leg:getAnnotationsFromIdWithWrap(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this performs the same role as above but inserts the name and type of the referenced component (e.g. “The &lt;Legislation&gt; element” or “The Value attribute”) before the annotation, and lowercases the first letter of the annotation to ensure the text reads correctly. This function also allows you to specify “intro” and “outro” text, which will be placed respectively after the name and type and after the end of the annotation - you can specify empty strings for either of these if you don't want to use this functionality e.g. <code>href="schemaLegislationMetadata_xsd.html" xpath="leg:getAnnotationsFromIdWithWrap(.,'AlternativeNumber_Value','','The value may contain the number on its own or with the series letter (e.g. C. 13)')"</code></li>
+                <li><code>leg:getFacetsFromId(contextNode, htmlIdOfComponentInGeneratedDocumentation)</code> - this retrieves the table of facets from a simple type e.g. <code>href="schemaCommentary_xsd.html" xpath="leg:getFacetsFromId(., 'CommentaryType')"</code></li>
             </ul>
           </li>
           <li><code>xpathInner</code> - describes which selected <b>subset</b> of the <code>xpath</code> content (if the content is well-formed HTML or XML) should be included using the standard XPath format when embedding content. Cannot be used in combination with <code>xpathStopAfter</code>. This is useful if you wanted to show the context of an element but not include all of its contents e.g. xpath="/*:Legislation/*:Metadata/*:SecondaryMetadata" xpathInner="*:Year|*:Number" will output the SecondaryMetadata element start and end but only output the Year and/or Number within it. If this attribute is used and <code>@fileref</code> is turned on the an extra paragraph is generated indicating that it is a partial sample.</li>
           <li><code>xpathStopAfter</code> - describes where to stop including the <b>subset</b> of the <code>xpath</code> content (all elements up to this point will be included) when embedding content. Cannot be used in combination with <code>xpathInner</code>. This is useful if you wanted to show the context of an element but not include all of its contents e.g. xpath="/*:Legislation/*:Primary/*:Body" xpathStopAfter="*:Part[1]/*:Chapter[1]/*:P1group[1]/*:P1[1]/*:P1para/*:P2[1]" will output the content up to and including the specified P2 element.</li>
+          <li><code>xpathExclude</code> - the opposite of <code>xpathInner</code>. Excludes specific elements from those selected by <code>xpath</code> or <code>xpathInner</code> e.g. xpath="/leg:Legislation" xpathExclude="(ukm:Metadata, leg:Secondary/leg:SecondaryPrelims)" will exclude ukm:Metadata and leg:SecondaryPrelims but output the rest of /leg:Legislation</li>
         </ul>
         <p>Any other attributes will be passed through to the HTML.</p>
         <p>This module also supports the generation a table of contents from <code>h1</code> headings of divs, where a <code>ci:toc</code> element is found.</p>
@@ -72,16 +75,19 @@
     <xsl:param name="gpSchemaIdMap" select="'schemaId2doc.map'" as="xs:string"/>
     <xsl:variable name="gvIdMap" select="document(concat($gpExtraDocFolder,'/',$gpSchemaIdMap))/*:idmap/*:entry" as="element()*"/>
 
-    <xsl:key name="kId" match="(//div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5]|//*[@id])">
+    <xsl:key name="kId" match="(//div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5]|//*[@id])" use="leg:getNodeId(.)"/>
+    
+    <xsl:function name="leg:getNodeId">
+        <xsl:param name="pContextNode" as="node()"/>
         <xsl:choose>
-            <xsl:when test="self::h2 or self::h3 or self::h4 or self::h5">
-                <xsl:sequence select="leg:generateSectionIdRecursive(ancestor::div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5])"/>
+            <xsl:when test="$pContextNode/(self::h2 or self::h3 or self::h4 or self::h5)">
+                <xsl:sequence select="leg:generateSectionIdRecursive($pContextNode/ancestor::div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5])"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:sequence select="@id"/>
+                <xsl:sequence select="$pContextNode/@id"/>
             </xsl:otherwise>
         </xsl:choose>
-    </xsl:key>
+    </xsl:function>
     
     <xsl:variable name="gvIdTextStart" as="xs:string">
         <xsl:text>.//*[@*:id='</xsl:text>
@@ -102,6 +108,7 @@
     
     <xsl:template match="ci:toc" mode="toc"/>
     
+    <!-- PA add support for generating ToC with h2, h3, h4, h5 -->
     <xsl:template match="div[@class = 'section']/*[self::h2 or self::h3 or self::h4 or self::h5]" mode="toc">
         <xsl:variable name="this-level" select="local-name()"/>
         <xsl:variable name="next-level" select="concat('h', string(xs:integer(substring(local-name(), 2, 1)) + 1))"/>
@@ -126,6 +133,7 @@
         </li>
     </xsl:template>
 
+    <!-- PA add support for generating ToC with appropriate "slug" IDs based off heading text -->
     <xsl:template match="h2 | h3 | h4 | h5" mode="generate-slug">
         <xsl:iterate select="reverse(ancestor::div[@class = 'section']/(h2 | h3 | h4 | h5) except following::*)">
             <xsl:param name="previous-set" select="()"/>
@@ -272,15 +280,30 @@
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
+        <!-- PA 26/4/22 add ability to exclude certain elements -->
+        <xsl:variable name="vXpathExcludeSelector" as="xs:string?">
+            <xsl:choose>
+                <xsl:when test="$vShow != 'embed'"/>
+                <xsl:when test="starts-with(@xpathExclude, '#')">
+                    <xsl:value-of select="concat($gvIdTextStart,substring-after(@xpathExclude, '#'),$gvIdTextEnd)"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="@xpathExclude"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:message>
           <xsl:text>Need to {$vShow} {$vFilename} with selection {$vXpath} </xsl:text>
           <xsl:choose>
             <xsl:when test="$vXpathInsideSelector">
-              <xsl:text>and optionally contents of {$vXpathInsideSelector} </xsl:text>
+              <xsl:text>and contents of {$vXpathInsideSelector} </xsl:text>
             </xsl:when>
             <xsl:when test="$vXpathStopAfterSelector">
-              <xsl:text>and optionally stopping at {$vXpathStopAfterSelector} </xsl:text>
+              <xsl:text>and stopping at {$vXpathStopAfterSelector} </xsl:text>
             </xsl:when>
+              <xsl:when test="$vXpathExcludeSelector">
+                  <xsl:text>and excluding {$vXpathExcludeSelector} </xsl:text>
+              </xsl:when>
           </xsl:choose>
           <xsl:text>inside file {$pThisFileUri}</xsl:text>
         </xsl:message>
@@ -318,6 +341,12 @@
                                     <xsl:choose>
                                         <xsl:when test="$vXpathInsideSelector">
                                             <xsl:for-each select="$vDocPart">
+                                                <!-- PA 26/4/22: Add ability to exclude nodes -->
+                                                <xsl:variable name="vNodesToExclude" as="xs:string*">
+                                                    <xsl:if test="$vXpathExcludeSelector">
+                                                        <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, $vDocPart, $vFilename, $vXpath)"/>
+                                                    </xsl:if>
+                                                </xsl:variable>
                                                 <xsl:try>
                                                     <xsl:variable name="vDocPartSubContent" as="element()*">
                                                         <!-- needs Saxon EE/PE or if using HE must be version 10 and above -->
@@ -327,25 +356,34 @@
                                                         <xsl:when test="$vDocPartSubContent">
                                                             <xsl:apply-templates select=".">
                                                                 <xsl:with-param name="pDocType" select="$vDocType"/>
-                                                                <xsl:with-param  name="pDocPartSubContent" select="$vDocPartSubContent"/>
+                                                                <xsl:with-param name="pDocPartSubContent" select="$vDocPartSubContent"/>
+                                                                <xsl:with-param name="pNodesToExclude" select="$vNodesToExclude"/>
                                                             </xsl:apply-templates>
                                                         </xsl:when>
                                                         <xsl:otherwise>
-                                                            <xsl:apply-templates select="$vDocPart">
+                                                        <!-- PA 9/3/2022 - commenting this out - we should terminate if the XPath fails because otherwise it's easy to miss mistakes in the content -->
+                                                            <!--<xsl:apply-templates select="$vDocPart">
                                                                 <xsl:with-param name="pDocType" select="$vDocType"/>
-                                                            </xsl:apply-templates>
-                                                            <xsl:message>WARNING: found find included file {$vFilename} and resolved xPath {$vXpath} but could not find specified content {$vXpathInsideSelector} of that element so using whole part inside file {$pThisFileUri}</xsl:message>
+                                                            </xsl:apply-templates>-->
+                                                        <xsl:message terminate="yes">ERROR: found find included file {$vFilename} and resolved xPath {$vXpath} but could not find specified content {$vXpathInsideSelector} of that element<!-- so using whole part inside file {$pThisFileUri}--></xsl:message>
                                                         </xsl:otherwise>
                                                     </xsl:choose>
                                                     <xsl:catch>
-                                                        <xsl:message>ERROR  {$err:description}: evaluate failed on included file {$vFilename}  and resolved xPath {$vXpath} but could not find specified content {$vXpathInsideSelector} inside file {$pThisFileUri}</xsl:message>
+                                                        <!-- PA 9/3/2022 - we should terminate if the XPath fails because otherwise it's easy to miss mistakes in the content -->
+                                                        <xsl:message terminate="yes">ERROR  {$err:description}: evaluate failed on included file {$vFilename}  and resolved xPath {$vXpath} but could not find specified content {$vXpathInsideSelector} inside file {$pThisFileUri}</xsl:message>
                                                     </xsl:catch>
                                                 </xsl:try>
                                             </xsl:for-each>
                                         </xsl:when>
                                         <xsl:when test="$vXpathStopAfterSelector">
                                             <xsl:for-each select="$vDocPart">
-                                                <!--<xsl:try>-->
+                                                <!-- PA 26/4/22: Add ability to exclude nodes -->
+                                                <xsl:variable name="vNodesToExclude" as="xs:string*">
+                                                    <xsl:if test="$vXpathExcludeSelector">
+                                                        <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, $vDocPart, $vFilename, $vXpath)"/>
+                                                    </xsl:if>
+                                                </xsl:variable>
+                                                <xsl:try>
                                                     <xsl:variable name="vDocStopAfterEl" as="element()*">
                                                         <xsl:evaluate xpath="$vXpathStopAfterSelector" context-item="."/>
                                                     </xsl:variable>
@@ -360,21 +398,20 @@
                                                             <xsl:variable name="vNodesToNotClose" select="for $n in $vDocStopAfterEl/ancestor::* return generate-id($n)"/>
                                                             <xsl:apply-templates select=".">
                                                                 <xsl:with-param name="pDocType" select="$vDocType"/>
-                                                                <xsl:with-param  name="pNodesToOutput" select="$vNodesToOutput"/>
-                                                                <xsl:with-param  name="pNodesToNotClose" select="$vNodesToNotClose"/>
+                                                                <xsl:with-param name="pNodesToOutput" select="$vNodesToOutput"/>
+                                                                <xsl:with-param name="pNodesToNotClose" select="$vNodesToNotClose"/>
+                                                                <xsl:with-param name="pNodesToExclude" select="$vNodesToExclude"/>
                                                             </xsl:apply-templates>
                                                         </xsl:when>
                                                         <xsl:otherwise>
-                                                            <xsl:apply-templates select="$vDocPart">
-                                                                <xsl:with-param name="pDocType" select="$vDocType"/>
-                                                            </xsl:apply-templates>
-                                                            <xsl:message>WARNING: found find included file {$vFilename} and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfterSelector} to stop after so using whole part inside file {$pThisFileUri}</xsl:message>
+                                                            <!-- PA 9/3/2022 - we should terminate if the XPath fails because otherwise it's easy to miss mistakes in the content -->
+                                                            <xsl:message terminate="yes">ERROR: found find included file {$vFilename} and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfterSelector} to stop after</xsl:message>
                                                         </xsl:otherwise>
                                                     </xsl:choose>
-                                                    <!--<xsl:catch>
-                                                        <xsl:message>ERROR  {$err:description}: evaluate failed on included file {$vFilename}  and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfter} to stop after inside file {$pThisFileUri}</xsl:message>
+                                                    <xsl:catch>
+                                                        <xsl:message terminate="yes">ERROR  {$err:description}: evaluate failed on included file {$vFilename}  and resolved xPath {$vXpath} but could not find specified el {$vXpathStopAfterSelector} to stop after inside file {$pThisFileUri}</xsl:message>
                                                     </xsl:catch>
-                                                </xsl:try>-->
+                                                </xsl:try>
                                             </xsl:for-each>
                                         </xsl:when>
                                         <xsl:otherwise>
@@ -387,8 +424,15 @@
                                                     </p>
                                                 </xsl:when>
                                                 <xsl:otherwise>
+                                                    <!-- PA 26/4/22: Add ability to exclude nodes -->
+                                                    <xsl:variable name="vNodesToExclude" as="xs:string*">
+                                                        <xsl:if test="$vXpathExcludeSelector">
+                                                            <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, $vDocPart, $vFilename, $vXpath)"/>
+                                                        </xsl:if>
+                                                    </xsl:variable>
                                                     <xsl:apply-templates select="$vDocPart">
                                                         <xsl:with-param name="pDocType" select="$vDocType"/>
+                                                        <xsl:with-param name="pNodesToExclude" select="$vNodesToExclude"/>
                                                     </xsl:apply-templates>
                                                 </xsl:otherwise>
                                             </xsl:choose>
@@ -396,16 +440,19 @@
                                     </xsl:choose>
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    <xsl:message>ERROR: found included file {$vFilename} but cannot resolve xPath {$vXpath} inside file {$pThisFileUri}</xsl:message>
+                                    <!-- PA 9/3/2022 - we should terminate if the XPath fails because otherwise it's easy to miss mistakes in the content -->
+                                    <xsl:message terminate="yes">ERROR: found included file {$vFilename} but cannot resolve xPath {$vXpath} inside file {$pThisFileUri}</xsl:message>
                                 </xsl:otherwise>
                             </xsl:choose>
                             <xsl:catch>
-                                <xsl:message>ERROR {$err:description}: evaluate failed on included file {$vFilename} with xPath {$vXpath} inside file {$pThisFileUri}</xsl:message>
+                                <!-- PA 9/3/2022 - we should terminate if the XPath fails because otherwise it's easy to miss mistakes in the content -->
+                                <xsl:message terminate="yes">ERROR {$err:description}: evaluate failed on included file {$vFilename} with xPath {$vXpath} inside file {$pThisFileUri}</xsl:message>
                             </xsl:catch>
                         </xsl:try>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:message>ERROR: cannot find included file {$vFilename} inside file {$pThisFileUri}</xsl:message>
+                        <!-- PA 9/3/2022 - we should terminate if the XPath fails because otherwise it's easy to miss mistakes in the content -->
+                        <xsl:message terminate="yes">ERROR: cannot find included file {$vFilename} inside file {$pThisFileUri}</xsl:message>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
@@ -417,18 +464,31 @@
                 <xsl:text> </xsl:text>
                 <xsl:choose>
                     <xsl:when test="@fileref and not(@fileref=('no','','yes'))">
-                        <xsl:value-of select="@fileref"/>
+                        <!-- PA 26/4/22: transform legislation.gov.uk links in @fileref into clickable links -->
+                        <xsl:apply-templates select="@fileref"/>
                     </xsl:when>
                     <xsl:otherwise>{tokenize($vFilename,'/')[last()]}</xsl:otherwise>
                 </xsl:choose>
             </p>
-        <xsl:if test="$vXpathInsideSelector or $vXpathStopAfterSelector">
+        <xsl:if test="$vXpathInsideSelector or $vXpathStopAfterSelector or $vXpathExcludeSelector">
                 <p class="fileref">
                     <b>Note:</b>
                     <xs:text> The content of this element has been reduced to make the example clearer.</xs:text>
                 </p>
             </xsl:if>    
         </xsl:if>
+    </xsl:template>
+    
+    <xsl:template match="@fileref">
+        <!-- PA 26/4/22: transform legislation.gov.uk links in @fileref into clickable links -->
+        <xsl:analyze-string select="." regex="https?://[a-z]+\.legislation\.gov\.uk/(([a-zA-Z0-9\-\._~!$&amp;'()*+,;=]|%[a-fA-F0-9][a-fA-F0-9]|:|@)+/?)*(\?([a-zA-Z0-9\-\._~!$&amp;'()*+,;=]|%[a-fA-F0-9][a-fA-F0-9]|:|@|/|\?)*)?(#([a-zA-Z0-9\-\._~!$&amp;'()*+,;=]|%[a-fA-F0-9][a-fA-F0-9]|:|@|/|\?)*)?">
+            <xsl:matching-substring>
+                <a href="{.}">{.}</a>
+            </xsl:matching-substring>
+            <xsl:non-matching-substring>
+                <xsl:value-of select="."/>
+            </xsl:non-matching-substring>
+        </xsl:analyze-string>
     </xsl:template>
     
     <xsl:template match="*">
@@ -439,6 +499,13 @@
         <xsl:param  name="pInitialIndent" select="''" as="xs:string"/>
         <xsl:param  name="pNodesToOutput" select="()" as="xs:string*"/>
         <xsl:param  name="pNodesToNotClose" select="()" as="xs:string*"/>
+        <xsl:param  name="pNodesToExclude" select="()" as="xs:string*"/>
+        
+        <!--<xsl:if test="local-name() = 'Metadata'">
+            <xsl:message>In ukm:Metadata, ID is <xsl:value-of select="generate-id()"/> in <xsl:value-of select="document-uri(root())"/></xsl:message>
+            <xsl:message>Current nodes to exclude are <xsl:value-of select="string-join(($pNodesToExclude), ' ')"/></xsl:message>
+            <xsl:message><xsl:value-of select="generate-id()"/> is<xsl:value-of select="if ($pNodesToExclude = generate-id()) then '' else ' NOT'"/> in the exclude list</xsl:message>
+        </xsl:if>-->
         
         <xsl:choose>
             <xsl:when test="$pDocType='html'">
@@ -453,7 +520,7 @@
                 <!-- get the indent of the end element via the whitespace after end of first child -->
                 <xsl:variable name="vInitialIndent" select="replace(*[last()]/following-sibling::text()[self::text()[normalize-space()=''] and (position() = last())],'\n','')" as="xs:string?"/>
                 <xsl:variable name="vSampleXML" as="node()*">
-                    <xsl:if test="count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)">
+                    <xsl:if test="(count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)) and (count($pNodesToExclude) = 0 or not($pNodesToExclude = generate-id(.)))">
                         <xsl:call-template name="outputEscapedStartElementName"/>
                         <xsl:choose>
                             <xsl:when test="$pDocPartSubContent">
@@ -463,6 +530,7 @@
                                     <xsl:with-param name="pDocType" select="$pDocType"/>
                                     <xsl:with-param name="pLevel" select="$pLevel + 1"/>
                                     <xsl:with-param name="pInitialIndent" select="$vInitialIndent"/>
+                                    <xsl:with-param name="pNodesToExclude" select="$pNodesToExclude"/>
                                 </xsl:apply-templates>
                                 <xsl:text>
     </xsl:text>
@@ -474,6 +542,7 @@
                                     <xsl:with-param name="pInitialIndent" select="$vInitialIndent"/>
                                     <xsl:with-param name="pNodesToOutput" select="$pNodesToOutput"/>
                                     <xsl:with-param name="pNodesToNotClose" select="$pNodesToNotClose"/>
+                                    <xsl:with-param name="pNodesToExclude" select="$pNodesToExclude"/>
                                 </xsl:apply-templates>
                             </xsl:otherwise>
                         </xsl:choose>
@@ -486,7 +555,7 @@
                 <pre xml:space="preserve"><xsl:sequence select="$vSampleXML"/></pre>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:if test="count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)">
+                <xsl:if test="(count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)) and (count($pNodesToExclude) = 0 or not($pNodesToExclude = generate-id(.)))">
                     <!--<xsl:if test="($pLevel=1) and $pInitialIndent != ''">
                         <!-\- we measured the indent form the first child so we need to add in one tab here
                             IF there was a start indent-\->
@@ -500,6 +569,7 @@
                         <xsl:with-param name="pInitialIndent" select="$pInitialIndent"/>
                         <xsl:with-param name="pNodesToOutput" select="$pNodesToOutput"/>
                         <xsl:with-param name="pNodesToNotClose" select="$pNodesToNotClose"/>
+                        <xsl:with-param name="pNodesToExclude" select="$pNodesToExclude"/>
                     </xsl:apply-templates>
 
                      <!--<xsl:if test="($pLevel=1) and ($pInitialIndent != '') and contains(./text()[last()],'&#x09;')">
@@ -546,13 +616,15 @@
         <xsl:param  name="pLevel" select="0" as="xs:integer"/>
         <xsl:param  name="pInitialIndent" select="''" as="xs:string"/>
         <xsl:param  name="pNodesToOutput" select="()" as="xs:string*"/>
+        <xsl:param  name="pNodesToExclude" select="()" as="xs:string*"/>
         <!--<xsl:variable name="vSmallerIndent" select="substring($pInitialIndent,1,string-length($pInitialIndent)-1)" as="xs:string?"/>-->
         <xsl:choose>
             <xsl:when test="$pDocType='html'">
                 <xsl:value-of select="."/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:if test="count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)">
+                <!-- PA 26/4/22: Don't output this text node if it's excluded OR if it's whitespace immediately preceding an excluded sibling -->
+                <xsl:if test="(count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)) and (count($pNodesToExclude) = 0 or not($pNodesToExclude = generate-id(.))) and (normalize-space() or not($pNodesToExclude = generate-id(following-sibling::*[1])))">
                     <span class="tT">
                         <xsl:variable name="vValue" as="xs:string?">
                             <xsl:choose>
@@ -578,6 +650,32 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
+    
+    <xsl:function name="leg:calculateNodesToExclude" as="xs:string*">
+        <xsl:param name="pXpathExcludeSelector" as="xs:string"/>
+        <xsl:param name="pContextNode" as="node()"/>
+        <xsl:param name="pFilename" as="xs:string"/>
+        <xsl:param name="pXpath" as="xs:string"/>
+        
+        <xsl:try>
+            <!-- needs Saxon EE/PE or if using HE must be version 10 and above -->
+            <!-- Must be cast as element(), otherwise generate-id() won't generate the right IDs -->
+            <xsl:variable name="vExcludedNodesNoDescendants" as="element()*">
+                <xsl:evaluate xpath="$pXpathExcludeSelector" context-item="$pContextNode"/>
+            </xsl:variable>
+            <xsl:choose>
+                <xsl:when test="$vExcludedNodesNoDescendants">
+                    <xsl:sequence select="(for $n in $vExcludedNodesNoDescendants/descendant::element() return generate-id($n), for $n in $vExcludedNodesNoDescendants/descendant::text() return generate-id($n), $vExcludedNodesNoDescendants/generate-id())"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:message>INFO: found find included file {$pFilename} and resolved xPath {$pXpath} but could not find specified content to exclude at {$pXpathExcludeSelector}</xsl:message>
+                </xsl:otherwise>
+            </xsl:choose>
+            <xsl:catch>
+                <xsl:message>INFO: found find included file {$pFilename} and resolved xPath {$pXpath} but could not find specified content to exclude at {$pXpathExcludeSelector}</xsl:message>
+            </xsl:catch>
+        </xsl:try>
+    </xsl:function>
     
     <xsl:function name="cm:getTableForComponentTitle" as="node()*" visibility="public">
         <xsl:param name="pContextNode" as="node()"/>
@@ -616,12 +714,148 @@
         <xsl:param name="pContextNode" as="node()"/>
         <xsl:sequence select="$pContextNode//div[starts-with(@id,'annotations')]/div[@class='annotation']/node()"/>   
     </xsl:function>
+    
+    <!-- PA 8/3/22 add support for retrieving facet table from generated docs -->
+    <xsl:function name="leg:getFacetsFromId" as="node()*" visibility="public">
+        <xsl:param name="pContextNode" as="node()"/>
+        <xsl:param name="pId" as="xs:string"/>
+        <xsl:sequence select="$pContextNode/root()//a[@id=$pId]/following-sibling::table[1]/leg:getFacetsFromTable(.)"/>   
+    </xsl:function>
+    
+    <!-- PA 8/3/22 add support for retrieving facet table from generated docs -->
+    <xsl:function name="leg:getFacetsFromTable" as="node()*" visibility="public">
+        <xsl:param name="pContextNode" as="node()"/>
+        <xsl:apply-templates select="$pContextNode//div[starts-with(@id,'facet')]/table[@class='facetsTable']" mode="facetsTable"/>   
+    </xsl:function>
+    
+    <!-- PA 8/3/22 add support for retrieving facet table from generated docs -->
+    <xsl:template match="table" mode="facetsTable">
+        <xsl:copy>
+            <xsl:apply-templates select="@*" mode="facetsTable"/>
+            <thead><tr><th>Value</th><th>Description</th></tr></thead>
+            <xsl:apply-templates mode="facetsTable"/>
+        </xsl:copy>
+    </xsl:template>
+    
+    <!-- PA 8/3/22 add support for retrieving facet table from generated docs -->
+    <xsl:template match="td[@class='firstColumn']" mode="facetsTable"/>
+    
+    <!-- PA 8/3/22 add support for retrieving facet table from generated docs -->
+    <xsl:template match="td" mode="facetsTable">
+        <xsl:variable name="prevFirstColumn" select="preceding-sibling::*[1]/self::td[@class='firstColumn']"/>
+        <xsl:copy>
+            <xsl:apply-templates select="@*" mode="facetsTable"/>
+            <xsl:apply-templates mode="facetsTable"/>
+            <xsl:if test="$prevFirstColumn[not(matches(., '^enumeration$', 'i'))]">
+                <xsl:value-of select="concat(' (', normalize-space(lower-case($prevFirstColumn)), ')')"/>
+            </xsl:if>
+        </xsl:copy>
+    </xsl:template>
+    
+    <!-- PA 8/3/22 add support for retrieving facet table from generated docs -->
+    <xsl:template match="node()" mode="facetsTable">
+        <xsl:copy>
+            <xsl:apply-templates select="@*" mode="facetsTable"/>
+            <xsl:apply-templates mode="facetsTable"/>
+        </xsl:copy>
+    </xsl:template>
+    
+    <xsl:template match="@*" mode="facetsTable">
+        <xsl:copy/>
+    </xsl:template>
+    
+    <!-- PA 8/3/22 add support for retrieving annotations but wrapped with start/end text and component name -->
+    <xsl:function name="leg:getAnnotationsFromIdWithWrap" as="node()*" visibility="public">
+        <xsl:param name="pContextNode" as="node()"/>
+        <xsl:param name="pId" as="xs:string"/>
+        <xsl:param name="pAdditionalText" as="xs:string?"/>
+        <xsl:param name="pAdditionalEpilogue" as="xs:string?"/>
+        <xsl:variable name="anchor" select="$pContextNode/root()//a[@id=$pId]"/>
+        <xsl:variable name="componentTitle" select="$anchor/following-sibling::*[1]/self::div[@class='componentTitle']"/>
+        <xsl:variable name="name" select="translate(normalize-space($componentTitle/child::span[@class='qname']/child::text()[last()]), '/@ ', '')"/>
+        <xsl:variable name="type" select="normalize-space(lower-case($componentTitle/text()[1]))"/>
+        <xsl:variable name="intro">
+            <xsl:text>The </xsl:text>
+            <code>
+                <xsl:choose>
+                    <xsl:when test="$type = 'element'">
+                        <xsl:value-of select="concat('&lt;', $name, '&gt;')"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="$name"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </code>
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="$type"/>
+        </xsl:variable>
+        <xsl:variable name="vAdditionalText">
+            <xsl:if test="normalize-space($pAdditionalText)">
+                <xsl:value-of select="concat(' ', normalize-space($pAdditionalText))"/>
+            </xsl:if>
+        </xsl:variable>
+        <xsl:variable name="annotations" select="$anchor/following-sibling::table[1]/cm:getAnnotationFromTable(.)"/>
+        <!-- PA 26/4/22: for some reason //text() doesn't work when $annotations is a seq of text nodes, 
+            and /descendant-or-self::text() doesn't work when it's a seq of nodes, so have to use /descendant-or-self::text()
+            and /text(), which seems to work. Also adding [normalize-space()] to ignore empty text nodes -->
+        <xsl:variable name="firstTextNode" as="node()" 
+            select="subsequence(($annotations/descendant-or-self::text(), $annotations/text())[normalize-space()],1,1)"/>
+        <xsl:variable name="lastTextNode" as="node()" 
+            select="($annotations/descendant-or-self::text(), $annotations/text())[normalize-space()][last()]"/>
+        <!--<xsl:if test="true()">
+            <xsl:message><xsl:value-of select="concat('pID: ', $pId)"/></xsl:message>
+            <xsl:message>ano: <xsl:sequence select="$annotations"/></xsl:message>
+            <xsl:message><xsl:value-of select="concat('FTN: ', $firstTextNode)"/></xsl:message>
+            <xsl:message><xsl:value-of select="concat('LTN: ', $lastTextNode)"/></xsl:message>
+        </xsl:if>-->
+        <xsl:sequence>
+            <xsl:apply-templates select="$annotations" mode="sub">
+                <xsl:with-param name="firstTextNode" select="$firstTextNode" tunnel="yes"/>
+                <xsl:with-param name="lastTextNode" select="$lastTextNode" tunnel="yes"/>
+                <xsl:with-param name="introContent" tunnel="yes">
+                    <xsl:sequence select="($intro, $vAdditionalText, ' ')"/>
+                    <xsl:value-of select="lower-case(substring($firstTextNode,1,1))"/> 
+                    <xsl:value-of select="substring($firstTextNode,2)"/> 
+                </xsl:with-param>
+                <xsl:with-param name="outroContent" select="($lastTextNode, ' ', $pAdditionalEpilogue)" tunnel="yes"/>
+            </xsl:apply-templates>
+        </xsl:sequence>
+    </xsl:function> 
+    
+    <!-- PA 8/3/22 add support for retrieving annotations but wrapped with start/end text and component name -->
+    <xsl:template match="node()|text()" mode="sub">
+        <xsl:param name="firstTextNode" as="node()" tunnel="yes"/>
+        <xsl:param name="lastTextNode" as="node()" tunnel="yes"/>
+        <xsl:param name="introContent" tunnel="yes"/>
+        <xsl:param name="outroContent" tunnel="yes"/>
+        <xsl:choose>
+            <xsl:when test="generate-id(.) = generate-id($firstTextNode)">
+                <xsl:sequence select="$introContent"/>
+            </xsl:when>
+            <xsl:when test="generate-id(.) = generate-id($lastTextNode)">
+                <xsl:sequence select="$outroContent"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:copy>
+                    <xsl:apply-templates select="@*" mode="sub"/>
+                    <xsl:apply-templates mode="sub"/>
+                </xsl:copy>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+    <!-- PA 8/3/22 add support for retrieving annotations but wrapped with start/end text and component name -->
+    <xsl:template match="@*" mode="sub">
+        <xsl:copy/>
+    </xsl:template>
 
+    <!-- PA add support for generating ToC with appropriate "slug" IDs based off heading text -->
     <xsl:function name="leg:createIdFromText" as="xs:string" visibility="public">
       <xsl:param name="pInput" as="xs:string"/>
       <xsl:sequence select="replace(replace(normalize-space(replace(lower-case($pInput), '(\s|_|-|–|—|:|;|,|\?|!|/|&amp;)+', ' ')), ' ', '-'), '[^a-z0-9\-]', '')"/>
     </xsl:function>
 
+    <!-- PA add support for generating ToC with appropriate "slug" IDs based off heading text -->
     <xsl:function name="leg:generateSectionId" as="xs:string" visibility="public">
       <xsl:param name="pNodes" as="element()+"/>
       <xsl:variable name="result" select="string-join($pNodes/leg:createIdFromText(.)[normalize-space()], '-')[normalize-space()]"/>
@@ -629,6 +863,7 @@
       <xsl:sequence select="$result"/>
     </xsl:function>
 
+    <!-- PA add support for generating ToC with appropriate "slug" IDs based off heading text -->
     <xsl:function name="leg:generateSectionIdRecursive" as="xs:string*" visibility="public">
       <xsl:param name="pNodes" as="element()*"/>
       <xsl:variable name="result" select="if ($pNodes) then (leg:generateSectionId($pNodes), leg:generateSectionIdRecursive($pNodes[position() gt 1])) else ()"/>

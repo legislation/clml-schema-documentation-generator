@@ -150,12 +150,56 @@
         </xsl:copy>
     </xsl:template>
     
+    <!-- = check for broken internal links = -->
+    <xsl:template match="a[starts-with(@href, '#')]">
+        <xsl:variable name="vAnchor" select="substring(@href, 2)"/>
+        <xsl:choose>
+            <xsl:when test="key('kId', $vAnchor, root(.))">
+                <xsl:copy-of select="."/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="vAnchorAltRegex" select="string-join(('', tokenize($vAnchor, '(-| )+'), ''), '.*')"/>
+                <xsl:variable name="vAlternatives">
+                    <xsl:sequence select="(//div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5]|//*[@id])/leg:getNodeId(.)[matches(., $vAnchorAltRegex)]"/>
+                </xsl:variable>
+                <xsl:message terminate="yes">
+                    <xsl:text>ERROR: Broken internal link with anchor </xsl:text>
+                    <xsl:value-of select="@href"/>
+                    <xsl:text> at </xsl:text>
+                    <xsl:value-of select="path(.)"/>
+                    <xsl:choose>
+                        <xsl:when test="$vAlternatives">
+                            <xsl:text>. Perhaps you meant to use one of the following anchors: </xsl:text>
+                            <xsl:value-of select="string-join($vAlternatives, ', ')"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text>. Check the anchor and try again.</xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:message>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
     <!-- change any static links to the reference guide to the name supplied 
         in order to save the user form manually changing for every version if 
         the reference filename contains version  -->
     <xsl:template match="a/@href[starts-with(.,'reference.html') and $gpReferenceGuide]" priority="+1">
         <xsl:attribute name="href">
             <xsl:value-of select="$gpReferenceGuide"/>
+            <xsl:if test="contains(.,'#')">
+                <xsl:text>#</xsl:text>
+                <xsl:value-of select="substring-after(.,'#')"/>
+            </xsl:if>
+        </xsl:attribute>
+    </xsl:template>
+    
+    <!-- change any static links to the user guide to the name supplied 
+        in order to save the user form manually changing for every version if 
+        the user filename contains version  -->
+    <xsl:template match="a/@href[starts-with(.,'userguide.html') and $gpUserGuide]" priority="+1">
+        <xsl:attribute name="href">
+            <xsl:value-of select="$gpUserGuide"/>
             <xsl:if test="contains(.,'#')">
                 <xsl:text>#</xsl:text>
                 <xsl:value-of select="substring-after(.,'#')"/>
