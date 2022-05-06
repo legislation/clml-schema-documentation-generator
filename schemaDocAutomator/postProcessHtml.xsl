@@ -54,7 +54,7 @@
                 </script>
             </xsl:if>
             
-            <xsl:if test="matches(document-uri(root()), '\.index[a-zA-Z]+\.html?$')">
+            <xsl:if test="matches(document-uri(root()), '(\.index[a-zA-Z]+|schHierarchy)\.html?$')">
                 <script type="text/javascript">
                 var startIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexListcomp.html';
                 var userGuideIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexUserGuide.html';
