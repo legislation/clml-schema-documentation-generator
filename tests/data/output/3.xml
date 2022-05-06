@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns="http://www.w3.org/1999/xhtml" id="result">
+                                 				
+                                 <p xmlns="http://www.w3.org/1999/xhtml">The <code>&lt;OrderedList&gt;</code> element describes an ordered list of items. These are used for numbered sub-provisions where the hierarchy
+                                    of numbered subprovisions is broken, such as in a definition list - except for in
+                                    tables, where <code>&lt;P<i>n</i>&gt;</code> elements are still used.</p>
+                                 				
+                                 <p xmlns="http://www.w3.org/1999/xhtml">Ordered lists should not be confused with provisions. Provisions are numbered paragraphs,
+                                    whereas ordered lists are semantically grouped paragraphs.</p>
+                                 				
+                                 <p xmlns="http://www.w3.org/1999/xhtml">The schema takes the approach that if there is a break in the hierarchy of the provisions
+                                    then any subsequent structure must be a list. This typically occurs where defined
+                                    terms contain numbered items. These should be done as ordered lists within unordered
+                                    lists, i.e. the defined term is an entry in an unordered list. Subsequently the chain
+                                    of numbered provisions is broken and any children must be ordered lists. This approach
+                                    comes from the schema provisions as being controlled by the indent of the provisions.</p>
+                                 				
+                                 <p xmlns="http://www.w3.org/1999/xhtml">The format of the list numbering is defined using the <code>Type</code> attribute.</p>
+                                 				
+                                 <p xmlns="http://www.w3.org/1999/xhtml">The text surrounding the number is defined using the <code>Decoration</code> attribute.</p>
+                                 				
+                                 <p xmlns="http://www.w3.org/1999/xhtml">A specific starting number can be specified using the <code>Start</code> attribute.</p>
+                                 			</div>

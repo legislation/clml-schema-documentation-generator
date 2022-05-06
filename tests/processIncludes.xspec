@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec" xmlns:ci="http://macksol.co.uk/include" xmlns:h="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:test-helper="x-urn:xspec:helper:ws-only-text:test-helper" stylesheet="file:/C:/Users/parnott/Source/Repos/tna.doctools.schemadocgenerator/schemaDocAutomator/processIncludes.xsl">
+<!--
+HELPFUL NOTES:
+
+ - Top level el in output XML file *must* have xmlns="http://www.w3.org/1999/xhtml" or you'll get weird errors
+ - If you want to apply transform to context AFTER transformation, use <x:context/> and then <x:call template=""/>,
+   use a template for <x:call/> that calls <xsl:apply-templates select="."/> to do initial transform and then
+   apply the subsequent transforms you want
+
+-->
+<!--
+Things to test for my custom functionality in Schema Doc Generator
+
+ci:toc
+
+	• Various slug/level things
+
+leg:getAnnotationsFromIdWithWrap
+
+	• No additional pre text; No epilogue
+	• Additional pre text; No epilogue
+	• No additional pre text; Additional epilogue, no preceding punctuation
+	• Additional pre text; Additional epilogue, no preceding punctuation
+	• No additional pre text; Additional epilogue with preceding punctuation
+	• Additional pre text; Additional epilogue with preceding punctuation
+
+	Þ Non-existent ID
+	Þ Item with no annotations
+	Þ Item with single text node annotation
+	Þ Item with single element annotation containing single text node, plus surrounding whitespace
+	Þ Item with single element annotation containing single text node, with no surrounding whitespace
+	Þ Item with multiple element annotation, no whitespace between els
+	Þ Item with multiple element annotation, extraneous whitespace in top level div only
+	Þ Item with multiple element annotation, extraneous whitespace in between descendant els
+
+leg:getFacetsFromId
+
+	· Attribute restriction within an element
+	· Attribute restriction within a complex type
+	· Restriction of a standalone type
+	· Standalone type
+
+	Þ String facets
+	Þ Pattern facets
+	Þ Others???
+
+ci:include
+
+@fileref
+
+	· No @fileref
+	· Regular @fileref
+	· @fileref with various leg.gov.uk URIs
+		○ One
+		○ Multiple 
+	· @fileref with non leg.gov.uk URI
+
+xpathStopAfter
+
+	· stop after XPath with * namespace, single stop target
+	· stop after XPath with leg:, ukm: namespaces, single stop target
+	· stop after XPath with * namespace, multiple stop targets separated by |
+	· stop after XPath with leg:, ukm: namespaces, multiple stop targets separated by |
+	· stop after XPath with * namespace, multiple stop targets separated by ,
+	· stop after XPath with leg:, ukm: namespaces, multiple stop targets separated by ,
+	· stop after XPath with * namespace, multiple stop targets resulting from single path (e.g. //*:div)
+	· stop after XPath with leg:, ukm: namespaces, multiple stop targets resulting from single path (e.g. //html:div)
+
+	Þ Non-existent target
+	Þ Non-existent stop element
+	Þ Single target, single stop element
+	Þ Single target, multiple stop elements within a single target
+	Þ Multiple targets, multiple stop elements within a single target
+	Þ Multiple targets, multiple stop elements, but only one in each target
+	Þ Multiple targets, multiple stop elements, and more than one in each target
+
+xpathExclude
+
+	· exclude XPath with * namespace, single exclude target
+	· exclude XPath with leg:, ukm: namespaces, single exclude target
+	· exclude XPath with * namespace, multiple exclude targets separated by |
+	· exclude XPath with leg:, ukm: namespaces, multiple exclude targets separated by |
+	· exclude XPath with * namespace, multiple exclude targets separated by ,
+	· exclude XPath with leg:, ukm: namespaces, multiple exclude targets separated by ,
+	· exclude XPath with * namespace, multiple exclude targets resulting from single path (e.g. //*:div)
+	· exclude XPath with leg:, ukm: namespaces, multiple exclude targets resulting from single path (e.g. //html:div)
+
+	Þ Non-existent target
+	Þ Non-existent exclude element
+	Þ Single target, single exclude element
+	Þ Single target, multiple exclude elements within a single target
+	Þ Multiple targets, multiple exclude elements within a single target
+	Þ Multiple targets, multiple exclude elements, but only one in each target
+	Þ Multiple targets, multiple exclude elements, and more than one in each target
+ 
+xpathStopAfter and xpathExclude in all combinations
+-->
+	<x:param name="gpExtraDocFolder" select="'../tests/data/input'"/>
+  <x:param name="gpSampleXmlFolder" select="'../tests/data/input'"/>
+  <x:param name="gpOutputFolder" select="'../tests/data/input'"/>
+  <x:param name="gpSchemaIdMap" select="'schemaId2doc.map'"/>
+	
+	<x:helper stylesheet="test-whitespace-helper.xsl" />
+  
+  <x:scenario label="ci:toc" pending="true"/>
+  
+  <x:scenario label="ci:include">
+    
+    <x:scenario label="Reference Guide HTML ➔">
+
+    	<x:scenario label="leg:getAnnotationsFromIdWithWrap ➔">
+      	
+      	<x:scenario label="Item with multiple element annotation, extraneous whitespace in between descendant els; No additional pre text; No epilogue">
+      		<x:context>
+      			<div id="result">
+      				<ci:include href="schemaLists_xsd.html" xpath="leg:getAnnotationsFromIdWithWrap(.,'OrderedList','describes','')"/>
+      			</div>
+      		</x:context>
+      		<!-- PA 30/4/22 - <x:context select=""/> applies select BEFORE transform - to apply after transform, use x:call 
+      			   with a template that applies your pre-transform first -->
+      		<x:call template="test-helper:transform-and-normalize-whitespace-like-html"/>
+      		
+      		<x:expect label="leg:getAnnotationsFromIdWithWrap(.,'OrderedList','describes',''): the entire annotation included with appropriate intro"
+      			href="data/output/3.xml" select="test-helper:normalize-whitespace-like-html(.)"/>
+      		<!-- PA 30/4/22 - apparently //p doesn't work in test/select, have to define explicit namespace prefix (or ns via Q{}) -->
+      		<x:expect label="leg:getAnnotationsFromIdWithWrap(.,'OrderedList','describes',''): the first paragraph appears as expected"
+      			test="(//h:p)[1]">
+      			<p>The <code>&lt;OrderedList&gt;</code> element describes an ordered list of items. These are used for numbered sub-provisions where the hierarchy of numbered subprovisions is broken, such as in a definition list - except for in tables, where <code>&lt;P<i>n</i>&gt;</code> elements are still used.</p>
+      		</x:expect>
+      		<x:expect label="leg:getAnnotationsFromIdWithWrap(.,'OrderedList','describes',''): the last paragraph appears as expected"
+      			test="(//h:p)[last()]">
+      			<p xmlns="http://www.w3.org/1999/xhtml">A specific starting number can be specified using the <code>Start</code> attribute.</p>
+      		</x:expect>
+      	</x:scenario>
+      	
+      </x:scenario>
+      
+    	<x:scenario label="leg:getFacetsFromId ➔">
+    		
+    		<!-- String facets; Pattern facets; Others? -->
+    		
+    		<x:scenario label="Attribute restriction within an element">
+    			<x:context>
+    				<div id="result">
+    					<ci:include href="schemaFigure_xsd.html" xpath="leg:getFacetsFromId(.,'Figure_ImageLayout')"/>
+    				</div>
+    			</x:context>
+    			<x:call template="test-helper:transform-and-normalize-whitespace-like-html"/>
+    			
+    			<x:expect label="leg:getFacetsFromId(.,'Figure_ImageLayout'): the entire table included with appropriate text"
+    				href="data/output/6.xml" select="test-helper:normalize-whitespace-like-html(.)"/>
+    			<x:expect label="leg:getFacetsFromId(.,'Figure_ImageLayout'): expected values appear in second row"
+    				test="//h:tbody/h:tr[2]">
+    				<tr> 
+    					<td width="30%" rowspan="1" colspan="1"><b>horizontal</b></td>
+    					<td rowspan="1" colspan="1">
+    						<div class="annotation">Images will be placed beside each other on the page</div>
+    					</td>
+    				</tr>
+    			</x:expect>
+    		</x:scenario>
+    		
+    		<x:scenario label="Attribute restriction within a attribute group, pattern">
+    			<x:context>
+    				<div id="result">
+    					<ci:include href="schemaLegislationCommonAttributes_xsd.html" xpath="leg:getFacetsFromId(.,'CommonAttributes_id')"/>
+    				</div>
+    			</x:context>
+    			<x:call template="test-helper:transform-and-normalize-whitespace-like-html"/>
+    			
+    			<x:expect label="leg:getFacetsFromId(.,'CommonAttributes_id'): the entire table included with appropriate text"
+    				href="data/output/4.xml" select="test-helper:normalize-whitespace-like-html(.)"/>
+    		</x:scenario>
+    		
+    		<x:scenario label="Attribute restriction within a complex type">
+    			<x:context>
+    				<div id="result">
+    					<ci:include href="schemaChanges_xsd.html" xpath="leg:getFacetsFromId(.,'ChangeType_Mark')"/>
+    				</div>
+    			</x:context>
+    			<x:call template="test-helper:transform-and-normalize-whitespace-like-html"/>
+    			
+    			<x:expect label="leg:getFacetsFromId(.,'ChangeType_Mark'): the entire table included with appropriate text"
+    				href="data/output/7.xml" select="test-helper:normalize-whitespace-like-html(.)"/>
+    			<x:expect label="leg:getFacetsFromId(.,'ChangeType_Mark'): expected values appears in first table cell"
+    				test="//h:tbody/h:tr[2]/h:td[1]">
+    				<td width="30%" rowspan="1" colspan="1"><b>End</b></td>
+    			</x:expect>
+    		</x:scenario>
+    		
+    		<x:scenario label="Content restriction within a simple type">
+    			<x:context>
+    				<div id="result">
+    					<ci:include href="schemaResources_xsd.html" xpath="leg:getFacetsFromId(.,'FileFormatsType')"/>
+    				</div>
+    			</x:context>
+    			<x:call template="test-helper:transform-and-normalize-whitespace-like-html"/>
+    			
+    			<x:expect label="leg:getFacetsFromId(.,'FileFormatsType'): the entire table included with appropriate text"
+    				href="data/output/5.xml" select="test-helper:normalize-whitespace-like-html(.)"/>
+    			<x:expect label="leg:getFacetsFromId(.,'FileFormatsType'): the expected values appear in the first column"
+    				test="//h:tbody/h:tr/h:td[1]">
+    				<td width="30%" rowspan="1" colspan="1"><b>doc</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>eps</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>gif</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>html</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>jpeg</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>mpeg</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>png</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>rtf</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>svg</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>xml</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>pdf</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>tiff</b></td>
+    				<td width="30%" rowspan="1" colspan="1"><b>other</b></td>
+    			</x:expect>
+    		</x:scenario>
+    		
+    	</x:scenario>
+      
+    </x:scenario>
+    
+    <x:scenario label="XML ➔">
+      
+      <x:scenario label="xpath ➔">
+        
+        <x:scenario label="Single target">
+          <x:context>
+            <ci:include href="ukpga_20210005_en.xml" xpath="//*:Contents"/>
+          </x:context>
+          
+          <x:expect label='xpath="//*:Contents": The full Contents element is reproduced' 
+            href="data/output/1.xml" select="/*/*"/>
+        </x:scenario>
+        
+      </x:scenario>
+      
+    	<x:scenario label="xpathStopAfter ➔" pending="true"/>
+      
+    	<x:scenario label="xpathExclude ➔" pending="true"/>
+      
+      <x:scenario label="xpathStopAfter and xpathExclude ➔">
+        
+        <x:scenario label="Single target, single stop after, multiple excludes">
+          <x:context>
+            <ci:include href="wsi-2022-367-made.xml" xpath="/leg:Legislation" xpathStopAfter="leg:Secondary/leg:ExplanatoryNotes[1]/leg:Comment[1]" xpathExclude="ukm:Metadata|leg:Secondary/leg:SecondaryPrelims/*[not(self::leg:Number or self::leg:SubjectInformation or self::leg:Title)]|leg:Secondary/leg:Body/leg:P1group[2]" fileref="Example taken from wsi-2022-367-made.xml, available at https://www.legislation.gov.uk/wsi/2022/367/made/data.xml" source="example"/>
+          </x:context>
+          
+          <x:expect label='xpath="/leg:Legislation" xpathStopAfter="leg:Secondary/leg:ExplanatoryNotes[1]/leg:Comment[1]" xpathExclude="ukm:Metadata|leg:Secondary/leg:SecondaryPrelims/*[not(self::leg:Number or self::leg:SubjectInformation or self::leg:Title)]|leg:Secondary/leg:Body/leg:P1group[2]": The Legislation element is reproduced up to the EN Comment, except for ukm:Metadata, everything in the prelims except Number Title and SubjectInformation, and the second P2group' 
+            href="data/output/2.xml" select="/*/*"/>
+        </x:scenario>
+        
+      </x:scenario>
+      
+    </x:scenario>
+    
+    <!-- 
+      <x:expect label='ATTRS: RESULT' 
+          href="data/output/FILENAME.xml" select="/*/*"/>
+      -->
+    
+  </x:scenario>
+</x:description>

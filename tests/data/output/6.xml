@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div id="result" xmlns="http://www.w3.org/1999/xhtml">
+  <table class="facetsTable">
+    <thead><tr><th>Value</th><th>Description</th></tr></thead>
+    <tbody><tr>
+      <td width="30%" rowspan="1" colspan="1"><b>vertical</b></td>
+      <td rowspan="1" colspan="1">
+        <div class="annotation">Images will be laid below each other on the page</div>
+      </td>
+    </tr>
+      <tr> 
+        <td width="30%" rowspan="1" colspan="1"><b>horizontal</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">Images will be placed beside each other on the page</div>
+        </td>
+      </tr>
+      <tr>        
+        <td width="30%" rowspan="1" colspan="1"><b>matrix-2-wide</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">Images will be placed two to a line, using enough lines as needed to place all the images</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>matrix-3-wide</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">Images will be placed three to a line, using enough lines as needed to place all the images</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>matrix-4-wide</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">Images will be placed four to a line, using enough lines as needed to place all the images</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>matrix-5-wide</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">Images will be placed five to a line, using enough lines as needed to place all the images</div>
+        </td>
+      </tr>
+    </tbody></table>
+</div>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div id="result" xmlns="http://www.w3.org/1999/xhtml">
+  <table class="facetsTable">
+    <thead>
+      <tr>
+        <th>Value</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>(\i\c*) &amp; ([\i-[:]][\c-[:]]*) &amp; ([a-z][0-9]{5})</b> (pattern)</td>
+        <td rowspan="1" colspan="1"><div class="annotation"/></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

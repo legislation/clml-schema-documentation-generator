@@ -4,6 +4,7 @@
     xmlns:c="http://www.w3.org/ns/xproc-step" xmlns:h="http://www.w3.org/1999/xhtml"
     xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
     xmlns:cx="http://xmlcalabash.com/ns/extensions"
+    xmlns:leg="http://www.legislation.gov.uk/namespaces/legislation"
     xmlns:xh="http://www.w3.org/1999/xhtml" version="1.0">
   
   <p:documentation>
@@ -59,7 +60,8 @@
   <p:option required="false" name="pInputSchemaFile" select="'schema/legislation.xsd'"/>
   <p:option required="false" name="pExtraDocFolder" select="'file:/C:/Users/colin/unified-master-schema/schemaDoc/CLMLfiles/extraDocFolder'"/>
   <p:option required="false" name="pHtmlAssetsSubFolder" select="'img'"/>
-  <p:option required="false" name="pAdditionalHtmlSubFolder" select="'html'"/> <!-- PA 9/3/22 support including additional HTML files -->
+  <p:option required="false" name="pAdditionalHtmlSubFolder" select="'html'"/> <!-- PA 5/5/2022 copy additional HTML to output folder -->
+  <p:option required="false" name="pAdditionalCssSubFolder" select="'css'"/> <!-- PA 5/5/2022 copy additional HTML to output folder -->
   <p:option required="false" name="pSampleXmlFolder" select="'file:/C:/Users/colin/unified-master-schema/schemaDoc/CLMLfiles/sampleXML'"/>
   <p:option required="false" name="pSchemaMapFile" select="'schemaId2doc.map'"/>
   <p:option required="false" name="pReferenceGuide" select="'CLMLreferenceGuide-v2-2.html'"/>
@@ -86,10 +88,10 @@
   <p:import href="generateHTMLdoc.xpl"/>
   <p:import href="populateHTMLdoc.xpl"/>
   <p:import href="copyFiles.xpl"/>
+  <p:import href="generateUserGuideIndex.xpl"/>
   
   <!--<p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>-->
   <p:import href="library-1.0.xpl"/>
-  
  
   <p:group>
      <!-- need to clear out temp and output folders-->
@@ -129,6 +131,7 @@
       <p:with-option name="pWorkingDirectoryPath" select="$pWorkingDirectoryPath"/>
       <p:with-option name="pExtraDocFolder" select="$pExtraDocFolder"/>
       <p:with-option name="pSampleXmlFolder" select="$pSampleXmlFolder"/>
+      <p:with-option name="pAdditionalHtmlSubFolder" select="$pAdditionalHtmlSubFolder"/>
       <p:with-option name="pStartURL" select="$pStartURL"/>
       <p:with-option name="pUserGuide" select="$pUserGuide"/>
       <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
@@ -136,7 +139,6 @@
       <p:with-option name="pOxygenPath" select="$pOxygenPath"/>
       <p:with-option name="pOxySettingsFilename" select="$pOxySettingsFilename"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
-      <p:with-option name="pAdditionalHtmlSubFolder" select="$pAdditionalHtmlSubFolder"/>
     </cm:generateHTMLdoc>
      
     <!-- now process the user guide-->
@@ -145,15 +147,29 @@
       <p:with-option name="pExtraDocFolder" select="$pExtraDocFolder"/>
       <p:with-option name="pSampleXmlFolder" select="$pSampleXmlFolder"/>
       <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
+      <p:with-option name="pUserGuide" select="$pUserGuide"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
       <p:with-option name="pSchemaMapFile" select="$pSchemaMapFile"/>
       <p:with-option name="pGenerateConfigIDpara" select="$pGenerateConfigIDpara"/>
     </cm:populateHTMLdoc>
+    
+    <!-- PA 5/5/22: generate User Guide index page -->
+    <leg:generateUserGuideIndex>
+      <p:with-option name="pUserGuide" select="$pUserGuide"/>
+      <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
+      <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
+    </leg:generateUserGuideIndex>
        
     <!-- then copy any supporting files into the output -->
     <cm:copyFiles>
       <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pHtmlAssetsSubFolder)"/>
       <p:with-option name="pOutputFolder" select="concat($pOutputFolder,'/',$pHtmlAssetsSubFolder)"/>
+    </cm:copyFiles>
+    
+    <!-- PA 5/5/2022 copy additional CSS to output folder -->
+    <cm:copyFiles>
+      <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pAdditionalCssSubFolder)"/>
+      <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
     </cm:copyFiles>
   </p:group>
   

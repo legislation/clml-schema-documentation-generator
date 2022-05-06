@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns="http://www.w3.org/1999/xhtml" id="result">
+  <pre xml:space="preserve"><span class="tEl">&lt;Legislation</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367"</span><span class="tAN"> NumberOfProvisions=</span><span class="tAV">"2"</span><span class="tAN"> xsi:schemaLocation=</span><span class="tAV">"http://www.legislation.gov.uk/namespaces/legislation http://www.legislation.gov.uk/schema/legislation.xsd"</span><span class="tAN"> SchemaVersion=</span><span class="tAV">"1.0"</span><span class="tEl">&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;Secondary</span><span class="tEl">&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;SecondaryPrelims</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/introduction/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367/introduction"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;Number</span><span class="tEl">&gt;</span><span class="tT">2022 No. 367 (W. 89)</span><span class="tEl">&lt;/Number&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;SubjectInformation</span><span class="tEl">&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;Subject</span><span class="tEl">&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;Title</span><span class="tEl">&gt;</span><span class="tT">Local Government, Wales</span><span class="tEl">&lt;/Title&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;/Subject&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;Subject</span><span class="tEl">&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;Title</span><span class="tEl">&gt;</span><span class="tT">Criminal Law, Wales</span><span class="tEl">&lt;/Title&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;/Subject&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;/SubjectInformation&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;Title</span><span class="tEl">&gt;</span><span class="tT">The Crime and Disorder Act 1998 (Additional Authority) (Wales) Order 2022</span><span class="tEl">&lt;/Title&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/SecondaryPrelims&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;Body</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/body/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367/body"</span><span class="tAN"> NumberOfProvisions=</span><span class="tAV">"2"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;P1group</span><span class="tEl">&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;Title</span><span class="tEl">&gt;</span><span class="tT">Title and coming into force</span><span class="tEl">&lt;/Title&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;P1</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/article/1/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367/article/1"</span><span class="tAN"> id=</span><span class="tAV">"article-1"</span><span class="tEl">&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;Pnumber</span><span class="tEl">&gt;</span><span class="tT">1</span><span class="tEl">&lt;/Pnumber&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;P1para</span><span class="tEl">&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;P2</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/article/1/1/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367/article/1/1"</span><span class="tAN"> id=</span><span class="tAV">"article-1-1"</span><span class="tEl">&gt;</span><span class="tT">
+              </span><span class="tEl">&lt;Pnumber</span><span class="tEl">&gt;</span><span class="tT">1</span><span class="tEl">&lt;/Pnumber&gt;</span><span class="tT">
+              </span><span class="tEl">&lt;P2para</span><span class="tEl">&gt;</span><span class="tT">
+                </span><span class="tEl">&lt;Text</span><span class="tEl">&gt;</span><span class="tT">The title of this Order is the Crime and Disorder Act 1998 (Additional Authority) (Wales) Order 2022.</span><span class="tEl">&lt;/Text&gt;</span><span class="tT">
+              </span><span class="tEl">&lt;/P2para&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;/P2&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;P2</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/article/1/2/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367/article/1/2"</span><span class="tAN"> id=</span><span class="tAV">"article-1-2"</span><span class="tEl">&gt;</span><span class="tT">
+              </span><span class="tEl">&lt;Pnumber</span><span class="tEl">&gt;</span><span class="tT">2</span><span class="tEl">&lt;/Pnumber&gt;</span><span class="tT">
+              </span><span class="tEl">&lt;P2para</span><span class="tEl">&gt;</span><span class="tT">
+                </span><span class="tEl">&lt;Text</span><span class="tEl">&gt;</span><span class="tT">This Order comes into force on 25 March 2022.</span><span class="tEl">&lt;/Text&gt;</span><span class="tT">
+              </span><span class="tEl">&lt;/P2para&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;/P2&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;/P1para&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;/P1&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;/P1group&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;SignedSection</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/signature/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367/signature"</span><span class="tEl">&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;Signatory</span><span class="tEl">&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;Signee</span><span class="tEl">&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;PersonName</span><span class="tEl">&gt;</span><span class="tT">Rebecca Evans</span><span class="tEl">&lt;/PersonName&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;JobTitle</span><span class="tEl">&gt;</span><span class="tT">Minister for Finance and Local Government, one of the Welsh Ministers</span><span class="tEl">&lt;/JobTitle&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;DateSigned</span><span class="tAN"> Date=</span><span class="tAV">"2022-03-23"</span><span class="tEl">&gt;</span><span class="tT">
+              </span><span class="tEl">&lt;DateText</span><span class="tEl">&gt;</span><span class="tT">23 March 2022</span><span class="tEl">&lt;/DateText&gt;</span><span class="tT">
+            </span><span class="tEl">&lt;/DateSigned&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;/Signee&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;/Signatory&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;/SignedSection&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/Body&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ExplanatoryNotes</span><span class="tAN"> DocumentURI=</span><span class="tAV">"http://www.legislation.gov.uk/wsi/2022/367/note/made"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/wsi/2022/367/note"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;Title</span><span class="tEl">&gt;</span><span class="tT">EXPLANATORY NOTE</span><span class="tEl">&lt;/Title&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;Comment</span><span class="tEl">&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;Para</span><span class="tEl">&gt;</span><span class="tT">
+          </span><span class="tEl">&lt;Text</span><span class="tEl">&gt;</span><span class="tT">(This note is not part of the Order)</span><span class="tEl">&lt;/Text&gt;</span><span class="tT">
+        </span><span class="tEl">&lt;/Para&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;/Comment&gt;</span></pre>
+  <p class="fileref"><b>Ref:</b> Example taken from wsi-2022-367-made.xml, available at <a href="https://www.legislation.gov.uk/wsi/2022/367/made/data.xml">https://www.legislation.gov.uk/wsi/2022/367/made/data.xml</a></p>
+  <p class="fileref"><b>Note:</b> The content of this element has been reduced to make the example clearer.</p>
+</div>

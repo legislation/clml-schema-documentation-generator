@@ -26,6 +26,7 @@
     <xsl:param name="gpStartingURL" as="xs:string"/>
     <xsl:param name="gpUserGuide" as="xs:string?"/>
     <xsl:param name="gpReferenceGuide" as="xs:string"/>
+    <xsl:param name="gpIsUserGuide" as="xs:boolean" select="false()"/>
     
     <xsl:include href="processIncludes.xsl"/>
     
@@ -36,13 +37,54 @@
     </xsl:template>
     
     <xsl:template match="comment()"/>
+    
+    <!-- PA 5/5/22: support reprocessing of sidebar ToC for user guide -->
+    <xsl:template match="head">
+        <xsl:copy copy-namespaces="no">
+            <xsl:apply-templates/>
+            
+            <xsl:if test="$gpIsUserGuide">
+                <script type="text/javascript">
+                var userGuideIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexUserGuide.html';
+                if (!!parent.indexFrame) {{
+                  if (!(parent.indexFrame.location.pathname.endsWith(userGuideIndexPage))) {{
+                    parent.indexFrame.location = userGuideIndexPage;
+                  }}
+                }}
+                </script>
+            </xsl:if>
+            
+            <xsl:if test="matches(document-uri(root()), '\.index[a-zA-Z]+\.html?$')">
+                <script type="text/javascript">
+                var startIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexListcomp.html';
+                var userGuideIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexUserGuide.html';
+                
+                document.addEventListener('DOMContentLoaded', function() {{
+                    var startPageLink = document.getElementById('startPageLink');
+                    var userGuideLink = document.getElementById('userGuideLink');
+                    
+                    startPageLink.addEventListener('click', function(e) {{
+                        if (window.location.pathname.endsWith(userGuideIndexPage)) {{
+                            window.location = startIndexPage;
+                        }}
+                    }});
+                    userGuideLink.addEventListener('click', function(e) {{
+                        if (!(window.location.pathname.endsWith(userGuideIndexPage))) {{
+                            window.location = userGuideIndexPage;
+                        }}
+                    }});
+                }});
+                </script>
+            </xsl:if>
+        </xsl:copy>
+    </xsl:template>
 
     <xsl:template match="script">
         <xsl:copy-of select="."/>
     </xsl:template>
     
     <xsl:template match="frame[@name='mainFrame']">
-        <xsl:copy>
+        <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="src" select="$gpStartingURL"/>
         </xsl:copy>
@@ -50,7 +92,7 @@
     
     <!-- showing toc be namespace by default gives users most useful element list -->
     <xsl:template match="frame[@name='indexFrame']">
-        <xsl:copy>
+        <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="src" select="concat(substring-before($gpReferenceGuide,'.html'),'.indexListcomp.html')"/>
 
@@ -62,7 +104,7 @@
     </xsl:template>
     
     <xsl:template match="div[@class='annotation']">
-        <xsl:copy>
+        <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
             <!-- we will not output links or content that are intend for the "instance" section of the documentation
                 This could be a ci:include or ci:appInfo with the particular source attribute values -->
@@ -71,7 +113,7 @@
     </xsl:template>
     
     <xsl:template match="div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5]">
-        <xsl:copy>
+        <xsl:copy copy-namespaces="no">
             <xsl:attribute name="id">
               <xsl:apply-templates select="." mode="generate-slug"/>
             </xsl:attribute>
@@ -85,7 +127,7 @@
     home.indexListns.html-->
     <xsl:template match="div[cm:isElementListContainer(.)]" priority="+1">
         <xsl:variable name="vElementToc" select="./div[cm:isElementToc(.)]" as="element()?"/>
-        <xsl:copy>
+        <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates select="$vElementToc"/>
             <xsl:apply-templates select="* except $vElementToc"/>
@@ -96,7 +138,10 @@
     <xsl:template match="h2[.='Table of Contents']" priority="+1">
         <xsl:next-match/>
         <!-- replace with a parameter -->
-        <p><a href="{$gpUserGuide}" target="mainFrame">User Guide</a></p>
+				<!-- PA 5/5/22: Add link to return to start page -->
+        <p>
+            <a href="{$gpStartingURL}" target="mainFrame" id="startPageLink">Start Page</a> | 
+            <a href="{$gpUserGuide}" target="mainFrame" id="userGuideLink">User Guide</a></p>
     </xsl:template>
     
     
@@ -144,7 +189,7 @@
     <xsl:template match="tr[cm:isInstanceRow(.)]" />
     
     <xsl:template match="tr[cm:isInstanceRow(.)]" mode="outputOriginal">
-        <xsl:copy>
+        <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:copy>

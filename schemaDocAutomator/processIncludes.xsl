@@ -109,7 +109,8 @@
     <xsl:template match="ci:toc" mode="toc"/>
     
     <!-- PA add support for generating ToC with h2, h3, h4, h5 -->
-    <xsl:template match="div[@class = 'section']/*[self::h2 or self::h3 or self::h4 or self::h5]" mode="toc">
+    <!-- PA 4/5/22 - remove h5 from ToC as it's too much detail -->
+    <xsl:template match="div[@class = 'section']/*[self::h2 or self::h3 or self::h4]" mode="toc">
         <xsl:variable name="this-level" select="local-name()"/>
         <xsl:variable name="next-level" select="concat('h', string(xs:integer(substring(local-name(), 2, 1)) + 1))"/>
         <li>
@@ -124,7 +125,8 @@
                 <xsl:value-of select="."/>
             </a>
             <xsl:variable name="following-children" select="following::*[local-name() = $next-level and parent::div[@class = 'section']] except following::*[local-name() = $this-level and parent::div[@class = 'section']]/following::*"/>
-            <xsl:if test="not(empty($following-children)) and not($this-level = 'h5')">
+            <!-- PA 4/5/22 - remove h5 from ToC and stop processing at h4 as it's too much detail -->
+            <xsl:if test="not(empty($following-children)) and not($this-level = 'h4')">
                 <xsl:text>&#10;</xsl:text>
                 <ul class="toc-{string(xs:integer(substring(local-name(), 2, 1)))}">
                     <xsl:apply-templates select="$following-children" mode="toc"/>
@@ -134,8 +136,9 @@
     </xsl:template>
 
     <!-- PA add support for generating ToC with appropriate "slug" IDs based off heading text -->
-    <xsl:template match="h2 | h3 | h4 | h5" mode="generate-slug">
-        <xsl:iterate select="reverse(ancestor::div[@class = 'section']/(h2 | h3 | h4 | h5) except following::*)">
+    <!-- PA 4/5/22 - remove h5 from ToC as it's too much detail -->
+    <xsl:template match="h2 | h3 | h4" mode="generate-slug">
+        <xsl:iterate select="reverse(ancestor::div[@class = 'section']/(h2 | h3 | h4) except following::*)">
             <xsl:param name="previous-set" select="()"/>
             <xsl:on-completion>
                 <xsl:message terminate="yes">
@@ -471,9 +474,10 @@
                 </xsl:choose>
             </p>
         <xsl:if test="$vXpathInsideSelector or $vXpathStopAfterSelector or $vXpathExcludeSelector">
+            <!-- PA 28/4/22: fixed bug - this was previously xs:text, which was outputting <xs:text xmlns:xs="http://www.w3.org/2001/XMLSchema"> into the HTML -->
                 <p class="fileref">
                     <b>Note:</b>
-                    <xs:text> The content of this element has been reduced to make the example clearer.</xs:text>
+                    <xsl:text> The content of this element has been reduced to make the example clearer.</xsl:text>
                 </p>
             </xsl:if>    
         </xsl:if>
@@ -651,6 +655,7 @@
         </xsl:choose>
     </xsl:template>
     
+    <!-- PA 26/4/22: add ability to exclude nodes in ci:include -->
     <xsl:function name="leg:calculateNodesToExclude" as="xs:string*">
         <xsl:param name="pXpathExcludeSelector" as="xs:string"/>
         <xsl:param name="pContextNode" as="node()"/>
@@ -733,7 +738,9 @@
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="facetsTable"/>
             <thead><tr><th>Value</th><th>Description</th></tr></thead>
-            <xsl:apply-templates mode="facetsTable"/>
+            <tbody>
+                <xsl:apply-templates select="(tbody/@*|tbody/*|* except tbody)" mode="facetsTable"/>
+            </tbody>
         </xsl:copy>
     </xsl:template>
     
@@ -770,38 +777,37 @@
         <xsl:param name="pId" as="xs:string"/>
         <xsl:param name="pAdditionalText" as="xs:string?"/>
         <xsl:param name="pAdditionalEpilogue" as="xs:string?"/>
-        <xsl:variable name="anchor" select="$pContextNode/root()//a[@id=$pId]"/>
-        <xsl:variable name="componentTitle" select="$anchor/following-sibling::*[1]/self::div[@class='componentTitle']"/>
-        <xsl:variable name="name" select="translate(normalize-space($componentTitle/child::span[@class='qname']/child::text()[last()]), '/@ ', '')"/>
-        <xsl:variable name="type" select="normalize-space(lower-case($componentTitle/text()[1]))"/>
-        <xsl:variable name="intro">
+        
+        <xsl:variable name="vAnchor" select="$pContextNode/root()//a[@id=$pId]"/>
+        <xsl:variable name="vComponentTitle" select="$vAnchor/following-sibling::*[1]/self::div[@class='componentTitle']"/>
+        <xsl:variable name="vName" select="translate(normalize-space($vComponentTitle/child::span[@class='qname']/child::text()[last()]), '/@ ', '')"/>
+        <xsl:variable name="vType" select="normalize-space(lower-case($vComponentTitle/text()[1]))"/>
+        <xsl:variable name="vIntro">
             <xsl:text>The </xsl:text>
             <code>
                 <xsl:choose>
-                    <xsl:when test="$type = 'element'">
-                        <xsl:value-of select="concat('&lt;', $name, '&gt;')"/>
+                    <xsl:when test="$vType = 'element'">
+                        <xsl:value-of select="concat('&lt;', $vName, '&gt;')"/>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:value-of select="$name"/>
+                        <xsl:value-of select="$vName"/>
                     </xsl:otherwise>
                 </xsl:choose>
             </code>
             <xsl:text> </xsl:text>
-            <xsl:value-of select="$type"/>
-        </xsl:variable>
-        <xsl:variable name="vAdditionalText">
+            <xsl:value-of select="$vType"/>
             <xsl:if test="normalize-space($pAdditionalText)">
                 <xsl:value-of select="concat(' ', normalize-space($pAdditionalText))"/>
             </xsl:if>
         </xsl:variable>
-        <xsl:variable name="annotations" select="$anchor/following-sibling::table[1]/cm:getAnnotationFromTable(.)"/>
+        <xsl:variable name="vAnnotations" select="$vAnchor/following-sibling::table[1]/cm:getAnnotationFromTable(.)"/>
         <!-- PA 26/4/22: for some reason //text() doesn't work when $annotations is a seq of text nodes, 
             and /descendant-or-self::text() doesn't work when it's a seq of nodes, so have to use /descendant-or-self::text()
             and /text(), which seems to work. Also adding [normalize-space()] to ignore empty text nodes -->
-        <xsl:variable name="firstTextNode" as="node()" 
-            select="subsequence(($annotations/descendant-or-self::text(), $annotations/text())[normalize-space()],1,1)"/>
-        <xsl:variable name="lastTextNode" as="node()" 
-            select="($annotations/descendant-or-self::text(), $annotations/text())[normalize-space()][last()]"/>
+        <xsl:variable name="vFirstTextNode" as="node()" 
+            select="subsequence(($vAnnotations/descendant-or-self::text(), $vAnnotations/text())[normalize-space()],1,1)"/>
+        <xsl:variable name="vLastTextNode" as="node()" 
+            select="($vAnnotations/descendant-or-self::text(), $vAnnotations/text())[normalize-space()][last()]"/>
         <!--<xsl:if test="true()">
             <xsl:message><xsl:value-of select="concat('pID: ', $pId)"/></xsl:message>
             <xsl:message>ano: <xsl:sequence select="$annotations"/></xsl:message>
@@ -809,31 +815,30 @@
             <xsl:message><xsl:value-of select="concat('LTN: ', $lastTextNode)"/></xsl:message>
         </xsl:if>-->
         <xsl:sequence>
-            <xsl:apply-templates select="$annotations" mode="sub">
-                <xsl:with-param name="firstTextNode" select="$firstTextNode" tunnel="yes"/>
-                <xsl:with-param name="lastTextNode" select="$lastTextNode" tunnel="yes"/>
-                <xsl:with-param name="introContent" tunnel="yes">
-                    <xsl:sequence select="($intro, $vAdditionalText, ' ')"/>
-                    <xsl:value-of select="lower-case(substring($firstTextNode,1,1))"/> 
-                    <xsl:value-of select="substring($firstTextNode,2)"/> 
-                </xsl:with-param>
-                <xsl:with-param name="outroContent" select="($lastTextNode, ' ', $pAdditionalEpilogue)" tunnel="yes"/>
+            <xsl:apply-templates select="$vAnnotations" mode="sub">
+                <xsl:with-param name="pFirstTextNode" select="$vFirstTextNode" tunnel="yes"/>
+                <xsl:with-param name="pLastTextNode" select="$vLastTextNode" tunnel="yes"/>
+                <xsl:with-param name="pIntro" select="$vIntro" tunnel="yes"/>
+                <xsl:with-param name="pAdditionalEpilogue" select="$pAdditionalEpilogue" tunnel="yes"/>
             </xsl:apply-templates>
         </xsl:sequence>
     </xsl:function> 
     
     <!-- PA 8/3/22 add support for retrieving annotations but wrapped with start/end text and component name -->
-    <xsl:template match="node()|text()" mode="sub">
-        <xsl:param name="firstTextNode" as="node()" tunnel="yes"/>
-        <xsl:param name="lastTextNode" as="node()" tunnel="yes"/>
-        <xsl:param name="introContent" tunnel="yes"/>
-        <xsl:param name="outroContent" tunnel="yes"/>
+    <!-- PA 28/4/22 ignore whitespace text nodes directly within <div class="annotation"> to fix spacing issues -->
+    <xsl:template match="node()|text()[not(parent::div[@class='annotation']) or normalize-space()]" mode="sub">
+        <xsl:param name="pFirstTextNode" as="node()" tunnel="yes"/>
+        <xsl:param name="pLastTextNode" as="node()" tunnel="yes"/>
+        <xsl:param name="pIntro" as="node()+" tunnel="yes"/>
+        <xsl:param name="pAdditionalEpilogue" as="xs:string?" tunnel="yes"/>
+        
+        <!-- PA 28/4/22 refactor code to work if the first text node is also the last -->
         <xsl:choose>
-            <xsl:when test="generate-id(.) = generate-id($firstTextNode)">
-                <xsl:sequence select="$introContent"/>
-            </xsl:when>
-            <xsl:when test="generate-id(.) = generate-id($lastTextNode)">
-                <xsl:sequence select="$outroContent"/>
+            <xsl:when test="generate-id(.) = generate-id($pFirstTextNode)">
+                <xsl:sequence select="$pIntro"/>
+                <xsl:text> </xsl:text>
+                <xsl:value-of select="lower-case(substring($pFirstTextNode, 1, 1))"/> 
+                <xsl:value-of select="substring($pFirstTextNode, 2)"/> 
             </xsl:when>
             <xsl:otherwise>
                 <xsl:copy>
@@ -842,6 +847,14 @@
                 </xsl:copy>
             </xsl:otherwise>
         </xsl:choose>
+        <xsl:if test="generate-id(.) = generate-id($pLastTextNode)">
+            <!-- PA 28/4/22 don't prepend space if epilogue starts with punctuation -->
+            <!-- PA 29/4/22 don't output anything unless an epilogue was provided -->
+            <xsl:if test="normalize-space($pAdditionalEpilogue)">
+                <xsl:value-of select="if(matches($pAdditionalEpilogue, '^[\.,:;\-]')) then '' else ' '"/>
+                <xsl:value-of select="$pAdditionalEpilogue"/>
+            </xsl:if>
+        </xsl:if>
     </xsl:template>
     
     <!-- PA 8/3/22 add support for retrieving annotations but wrapped with start/end text and component name -->

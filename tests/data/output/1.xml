@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div id="result" xmlns="http://www.w3.org/1999/xhtml">
+  <pre xml:space="preserve"><span class="tEl">&lt;Contents</span><span class="tEl">&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Ministerial and other Maternity Allowances Act 2021</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;ContentsPblock</span><span class="tAN"> ContentRef=</span><span class="tAV">"crossheading-ministerial-maternity-allowances"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/crossheading/ministerial-maternity-allowances"</span><span class="tEl">&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Ministerial maternity allowances</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsItem</span><span class="tAN"> ContentRef=</span><span class="tAV">"section-1"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/section/1"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsNumber</span><span class="tEl">&gt;</span><span class="tT">1</span><span class="tEl">&lt;/ContentsNumber&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Payment of maternity allowance: Ministerial office</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/ContentsItem&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsItem</span><span class="tAN"> ContentRef=</span><span class="tAV">"section-2"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/section/2"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsNumber</span><span class="tEl">&gt;</span><span class="tT">2</span><span class="tEl">&lt;/ContentsNumber&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Ministerial leave: amount and payment of allowance</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/ContentsItem&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsItem</span><span class="tAN"> ContentRef=</span><span class="tAV">"section-3"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/section/3"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsNumber</span><span class="tEl">&gt;</span><span class="tT">3</span><span class="tEl">&lt;/ContentsNumber&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Ministerial leave: other provision</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/ContentsItem&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;/ContentsPblock&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;ContentsPblock</span><span class="tAN"> ContentRef=</span><span class="tAV">"crossheading-opposition-maternity-allowances"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/crossheading/opposition-maternity-allowances"</span><span class="tEl">&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Opposition maternity allowances</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsItem</span><span class="tAN"> ContentRef=</span><span class="tAV">"section-4"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/section/4"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsNumber</span><span class="tEl">&gt;</span><span class="tT">4</span><span class="tEl">&lt;/ContentsNumber&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Payment of maternity allowance: Opposition office</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/ContentsItem&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsItem</span><span class="tAN"> ContentRef=</span><span class="tAV">"section-5"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/section/5"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsNumber</span><span class="tEl">&gt;</span><span class="tT">5</span><span class="tEl">&lt;/ContentsNumber&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Opposition leave: amount and payment of allowance</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/ContentsItem&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsItem</span><span class="tAN"> ContentRef=</span><span class="tAV">"section-6"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/section/6"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsNumber</span><span class="tEl">&gt;</span><span class="tT">6</span><span class="tEl">&lt;/ContentsNumber&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Opposition leave: other provision</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/ContentsItem&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;/ContentsPblock&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;ContentsPblock</span><span class="tAN"> ContentRef=</span><span class="tAV">"crossheading-extent-etc"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/crossheading/extent-etc"</span><span class="tEl">&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Extent, etc</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;ContentsItem</span><span class="tAN"> ContentRef=</span><span class="tAV">"section-7"</span><span class="tAN"> IdURI=</span><span class="tAV">"http://www.legislation.gov.uk/id/ukpga/2021/5/section/7"</span><span class="tEl">&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsNumber</span><span class="tEl">&gt;</span><span class="tT">7</span><span class="tEl">&lt;/ContentsNumber&gt;</span><span class="tT">
+      </span><span class="tEl">&lt;ContentsTitle</span><span class="tEl">&gt;</span><span class="tT">Extent, commencement and short title</span><span class="tEl">&lt;/ContentsTitle&gt;</span><span class="tT">
+    </span><span class="tEl">&lt;/ContentsItem&gt;</span><span class="tT">
+  </span><span class="tEl">&lt;/ContentsPblock&gt;</span><span class="tT">
+</span><span class="tEl">&lt;/Contents&gt;</span></pre>
+  <p class="fileref"><b>Ref:</b> ukpga_20210005_en.xml</p>
+</div>

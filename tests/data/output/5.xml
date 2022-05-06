@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns="http://www.w3.org/1999/xhtml" id="result">
+  <table class="facetsTable">
+    <thead>
+      <tr><th>Value</th><th>Description</th></tr>
+    </thead>
+    <tbody><tr>
+      <td width="30%" rowspan="1" colspan="1"><b>doc</b></td>
+      <td rowspan="1" colspan="1">
+        <div class="annotation">Word document</div>
+      </td>
+    </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>eps</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">EPS graphic</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>gif</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">GIF graphic</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>html</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">HTML document</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>jpeg</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">JPEG graphic</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>mpeg</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">MPEG video</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>png</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">PNG graphic</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>rtf</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">Rich Text Format document</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>svg</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">SVG graphic</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>xml</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">XML document</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>pdf</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">PDF document</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>tiff</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">TIFF graphic</div>
+        </td>
+      </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>other</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">Unspecified format. Note that an application processing the document may not know
+            how to handle the file</div>
+        </td>
+      </tr>
+    </tbody></table>
+</div>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns="http://www.w3.org/1999/xhtml" id="result">
+  <table class="facetsTable">
+    <thead><tr><th>Value</th><th>Description</th></tr></thead>
+    <tbody><tr>
+      <td width="30%" rowspan="1" colspan="1"><b>Start</b></td>
+      <td rowspan="1" colspan="1">
+        <div class="annotation">
+        </div></td>
+    </tr>
+      <tr>
+        <td width="30%" rowspan="1" colspan="1"><b>End</b></td>
+        <td rowspan="1" colspan="1">
+          <div class="annotation">
+          </div></td>
+      </tr>
+    </tbody></table>
+</div>

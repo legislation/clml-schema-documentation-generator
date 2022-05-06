@@ -28,6 +28,7 @@
     <p:option required="true" name="pWorkingDirectoryPath"/>
     <p:option required="true" name="pExtraDocFolder"/>
     <p:option required="true" name="pSampleXmlFolder"/>
+    <p:option required="true" name="pAdditionalHtmlSubFolder"/>
     <p:option required="true" name="pStartURL"/>
     <p:option required="false" name="pUserGuide" select="''"/>
     <p:option required="true" name="pReferenceGuide"/>
@@ -35,7 +36,6 @@
     <p:option required="true" name="pOxySettingsFilename"/>
     <p:option required="true" name="pOxygenPath"/>
     <p:option required="true" name="pOutputFolder"/>
-    <p:option required="true" name="pAdditionalHtmlSubFolder"/>
     
     <p:import href="library-1.0.xpl"/>
     <p:import href="getFolderList.xpl"/>
@@ -122,8 +122,10 @@
                 <p:pipe port="result" step="xsd2html"/>
               </p:with-option>
             </cx:message>
+          </p:group>
+          <p:group>
             
-            <!-- PA 9/3/22 Copy any supporting HTML files into the intermediate output folder -->
+            <!-- PA 5/5/2022 copy additional HTML to intermediate output folder, after generation to avoid that overwriting anything -->
             <cm:copyFiles>
               <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pAdditionalHtmlSubFolder)"/>
               <p:with-option name="pOutputFolder" select="$pOxygenOutputFolder"/>
