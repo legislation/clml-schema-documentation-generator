@@ -44,7 +44,7 @@
         <p:with-param name="gpSchemaIdMap" select="$pSchemaMapFile"/>
         <p:with-param name="gpGenerateConfigIDpara" select="$pGenerateConfigIDpara"/>
         <p:with-param name="gpReferenceGuide" select="$pReferenceGuide"/>
-        <p:with-param name="gpIsUserGuide" select="true()"/>
+        <p:with-param name="gpUserGuide" select="$pUserGuide"/>
     </p:xslt>
     <p:store name="userGuideOut">
       <p:with-option name="href" select="concat($pOutputFolder,'/', $pHtmlFilename)"/>

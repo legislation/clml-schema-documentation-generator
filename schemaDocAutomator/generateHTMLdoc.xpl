@@ -36,6 +36,7 @@
     <p:option required="true" name="pOxySettingsFilename"/>
     <p:option required="true" name="pOxygenPath"/>
     <p:option required="true" name="pOutputFolder"/>
+    <p:option required="true" name="pDocFilesSubFolder"/>
     
     <p:import href="library-1.0.xpl"/>
     <p:import href="getFolderList.xpl"/>
@@ -139,6 +140,8 @@
             <p:filter select="//*:file[ends-with(@name,'.html') or ends-with(@name,'.htm')]"/> 
             <p:for-each name="iterateHTML" >
               <p:variable name="vHTMLfilename" select="/*/@relname"/>
+              <!-- PA 6/5/22: add support for doc files sub-folder -->
+              <p:variable name="vOutputPath" select="concat($pOutputFolder,'/', if (not($vHTMLfilename = $pReferenceGuide) and normalize-space($pDocFilesSubFolder)) then concat($pDocFilesSubFolder, '/') else '', $vHTMLfilename)"/>
               <p:variable name="vFullPathInputHTML" select="concat($pOxygenOutputFolder, '/', $vHTMLfilename)"/>
               <cx:message>
                   <p:with-option name="message" select="concat('HTML post processing ',$vFullPathInputHTML)"/>
@@ -154,13 +157,15 @@
                   <p:with-param name="gpExtraDocFolder" select="$pExtraDocFolder"/>
                   <p:with-param name="gpSampleXmlFolder" select="$pSampleXmlFolder"/>
                   <p:with-param name="gpOutputFolder" select="$pOutputFolder"/>
+                  <p:with-param name="gpDocFilesSubFolder" select="$pDocFilesSubFolder"/>
                   <p:with-param name="gpStartingURL" select="$pStartURL"/>
                   <p:with-param name="gpUserGuide" select="$pUserGuide"/>
                   <p:with-param name="gpReferenceGuide" select="$pReferenceGuide"/>
               </p:xslt>
+              <!-- PA 6/5/22: add support for doc files sub-folder -->
               <p:store name="htmlOut">
-                <p:with-option name="href" select="concat($pOutputFolder,'/', $vHTMLfilename)"/>
-              </p:store>
+                <p:with-option name="href" select="$vOutputPath"/>
+              </p:store> 
             </p:for-each>
             
             <!-- move the CSS and image folder to the final output -->  
@@ -176,10 +181,21 @@
               <cx:message>
                   <p:with-option name="message" select="concat('Moving ',$vFullPathInput, ' to ', $pOutputFolder, '/', $vFilename)"/>
               </cx:message>
-              <cxf:move>
-                  <p:with-option name="href" select="$vFullPathInput"/>
-                  <p:with-option name="target" select="concat($pOutputFolder, '/', $vFilename)"/>
-              </cxf:move>
+              <!-- PA 6/5/22: add support for doc files sub-folder -->
+              <p:choose>
+                <p:when test="normalize-space($pDocFilesSubFolder)">
+                  <cxf:move>
+                    <p:with-option name="href" select="$vFullPathInput"/>
+                    <p:with-option name="target" select="concat($pOutputFolder, '/', $pDocFilesSubFolder, '/', $vFilename)"/>
+                  </cxf:move>
+                </p:when>
+                <p:otherwise>
+                  <cxf:move>
+                    <p:with-option name="href" select="$vFullPathInput"/>
+                    <p:with-option name="target" select="concat($pOutputFolder, '/', $vFilename)"/>
+                  </cxf:move>
+                </p:otherwise>
+              </p:choose>
             </p:for-each>
           
             <cxf:delete>

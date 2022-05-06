@@ -26,7 +26,7 @@
     <xsl:param name="gpStartingURL" as="xs:string"/>
     <xsl:param name="gpUserGuide" as="xs:string?"/>
     <xsl:param name="gpReferenceGuide" as="xs:string"/>
-    <xsl:param name="gpIsUserGuide" as="xs:boolean" select="false()"/>
+    <xsl:param name="gpDocFilesSubFolder" as="xs:string?"/>
     
     <xsl:include href="processIncludes.xsl"/>
     
@@ -43,7 +43,7 @@
         <xsl:copy copy-namespaces="no">
             <xsl:apply-templates/>
             
-            <xsl:if test="$gpIsUserGuide">
+            <xsl:if test="ends-with(document-uri(root()), concat('/', $gpUserGuide))">
                 <script type="text/javascript">
                 var userGuideIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexUserGuide.html';
                 if (!!parent.indexFrame) {{
@@ -64,7 +64,7 @@
                     var userGuideLink = document.getElementById('userGuideLink');
                     
                     startPageLink.addEventListener('click', function(e) {{
-                        if (window.location.pathname.endsWith(userGuideIndexPage)) {{
+                        if (!(window.location.pathname.endsWith(startIndexPage))) {{
                             window.location = startIndexPage;
                         }}
                     }});
@@ -78,6 +78,42 @@
             </xsl:if>
         </xsl:copy>
     </xsl:template>
+    
+    <!-- PA 6/5/22: add support for doc files sub-folder -->
+    <xsl:template match="link[@rel='stylesheet']">
+        <xsl:copy copy-namespaces="no">
+            <xsl:copy-of select="@* except @href"/>
+            <xsl:attribute name="href">
+                <xsl:choose>
+                    <xsl:when test="$gpDocFilesSubFolder and ends-with(document-uri(root()), concat('/', $gpReferenceGuide))">
+                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', @href)"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@href"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+    
+    <!-- PA 6/5/22: add support for doc files sub-folder -->
+    <xsl:template match="script[@src]">
+        <xsl:copy copy-namespaces="no">
+            <xsl:copy-of select="@* except @src"/>
+            <xsl:attribute name="src">
+                <xsl:choose>
+                    <xsl:when test="$gpDocFilesSubFolder and ends-with(document-uri(root()), concat('/', $gpReferenceGuide))">
+                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', @src)"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@src"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
 
     <xsl:template match="script">
         <xsl:copy-of select="."/>
@@ -86,15 +122,36 @@
     <xsl:template match="frame[@name='mainFrame']">
         <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
-            <xsl:attribute name="src" select="$gpStartingURL"/>
+            <!-- PA 6/5/22: add support for doc files sub-folder -->
+            <xsl:attribute name="src">
+                <xsl:choose>
+                    <xsl:when test="$gpDocFilesSubFolder">
+                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', $gpStartingURL)"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="$gpStartingURL"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
         </xsl:copy>
     </xsl:template>
     
     <!-- showing toc be namespace by default gives users most useful element list -->
     <xsl:template match="frame[@name='indexFrame']">
+        <xsl:variable name="vDefaultIndexPage" select="concat(substring-before($gpReferenceGuide,'.html'),'.indexListcomp.html')"/>
         <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
-            <xsl:attribute name="src" select="concat(substring-before($gpReferenceGuide,'.html'),'.indexListcomp.html')"/>
+            <!-- PA 6/5/22: add support for doc files sub-folder -->
+            <xsl:attribute name="src">
+                <xsl:choose>
+                    <xsl:when test="$gpDocFilesSubFolder">
+                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', $vDefaultIndexPage)"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="$vDefaultIndexPage"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
 
             <!-- e.g. list by component
             <xsl:attribute name="src" select="'reference.indexListcomp.html'"/>
@@ -231,7 +288,8 @@
         the reference filename contains version  -->
     <xsl:template match="a/@href[starts-with(.,'reference.html') and $gpReferenceGuide]" priority="+1">
         <xsl:attribute name="href">
-            <xsl:value-of select="$gpReferenceGuide"/>
+            <!-- PA 6/5/22: add support for doc files sub-folder -->
+            <xsl:value-of select="concat(if ($gpDocFilesSubFolder) then '../' else '', $gpReferenceGuide)"/>
             <xsl:if test="contains(.,'#')">
                 <xsl:text>#</xsl:text>
                 <xsl:value-of select="substring-after(.,'#')"/>

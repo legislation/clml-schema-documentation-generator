@@ -71,6 +71,7 @@
   <p:option required="false" name="pTempFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/temp/schemaTempFolder'"/>
   <p:option required="false" name="pOxygenOutputFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/temp/oxygenOutput'"/>
   <p:option required="false" name="pOutputFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/finalOutput'"/>
+  <p:option required="false" name="pDocFilesSubFolder" select="''"/>
   
   <p:option required="false" name="pOxySettingsFilename" select="'oxygenSettings.xml'"/>
   <p:option required="false" name="pOxygenPath" select="'file:/C:/Program Files/Oxygen XML Editor 21'"/>
@@ -92,6 +93,8 @@
   
   <!--<p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>-->
   <p:import href="library-1.0.xpl"/>
+  
+  <p:variable name="vDocFilesDestination" select="concat($pOutputFolder, if (normalize-space($pDocFilesSubFolder)) then concat('/', $pDocFilesSubFolder) else '')"/>
  
   <p:group>
      <!-- need to clear out temp and output folders-->
@@ -104,6 +107,16 @@
      <cm:deleteAndMakeFolder>
        <p:with-option name="pFolder" select="$pOutputFolder"/>
      </cm:deleteAndMakeFolder>
+     <p:choose>
+       <p:when test="normalize-space($pDocFilesSubFolder)">
+         <cm:deleteAndMakeFolder>
+           <p:with-option name="pFolder" select="$vDocFilesDestination"/>
+         </cm:deleteAndMakeFolder>
+       </p:when>
+       <p:otherwise>
+         <p:identity/>
+       </p:otherwise>
+     </p:choose>
      <p:choose>
        <p:when test="ends-with($pInputSchemaFile,'rng')">
          <cm:rng2xsd>
@@ -139,6 +152,7 @@
       <p:with-option name="pOxygenPath" select="$pOxygenPath"/>
       <p:with-option name="pOxySettingsFilename" select="$pOxySettingsFilename"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
+      <p:with-option name="pDocFilesSubFolder" select="$pDocFilesSubFolder"/>
     </cm:generateHTMLdoc>
      
     <!-- now process the user guide-->
@@ -148,7 +162,7 @@
       <p:with-option name="pSampleXmlFolder" select="$pSampleXmlFolder"/>
       <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
       <p:with-option name="pUserGuide" select="$pUserGuide"/>
-      <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
+      <p:with-option name="pOutputFolder" select="$vDocFilesDestination"/>
       <p:with-option name="pSchemaMapFile" select="$pSchemaMapFile"/>
       <p:with-option name="pGenerateConfigIDpara" select="$pGenerateConfigIDpara"/>
     </cm:populateHTMLdoc>
@@ -157,19 +171,19 @@
     <leg:generateUserGuideIndex>
       <p:with-option name="pUserGuide" select="$pUserGuide"/>
       <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
-      <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
+      <p:with-option name="pOutputFolder" select="$vDocFilesDestination"/>
     </leg:generateUserGuideIndex>
        
     <!-- then copy any supporting files into the output -->
     <cm:copyFiles>
       <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pHtmlAssetsSubFolder)"/>
-      <p:with-option name="pOutputFolder" select="concat($pOutputFolder,'/',$pHtmlAssetsSubFolder)"/>
+      <p:with-option name="pOutputFolder" select="concat($vDocFilesDestination,'/',$pHtmlAssetsSubFolder)"/>
     </cm:copyFiles>
     
     <!-- PA 5/5/2022 copy additional CSS to output folder -->
     <cm:copyFiles>
       <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pAdditionalCssSubFolder)"/>
-      <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
+      <p:with-option name="pOutputFolder" select="$vDocFilesDestination"/>
     </cm:copyFiles>
   </p:group>
   
