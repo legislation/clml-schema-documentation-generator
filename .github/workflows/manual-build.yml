@@ -74,6 +74,8 @@ jobs:
         run: sed -i -E "s#%%WORKSPACE%%#${GITHUB_WORKSPACE}#g" "${GITHUB_WORKSPACE}/generator/generator.xpr"
       - name: Run schema documentation generator transform
         run: '"${GITHUB_WORKSPACE}/oxygen/scripts/transform.sh" -i "${GITHUB_WORKSPACE}/generator/schemaDocAutomator/generateSchemaDoc.xpl" -sn generateSchemaDoc -s "${GITHUB_WORKSPACE}/generator/generator.xpr" -v'
+      - name: Rename welcome.html to index.html (if required)
+        run: [[ -f "${GITHUB_WORKSPACE}/final-output/welcome.html" ]] && [[ !-f "${GITHUB_WORKSPACE}/final-output/index.html" ]] && mv "${GITHUB_WORKSPACE}/final-output/welcome.html" "${GITHUB_WORKSPACE}/final-output/index.html"
 
   deploy:
     needs: build
