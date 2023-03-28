@@ -43,7 +43,7 @@ on:
         type: boolean
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout documentation generator
@@ -96,13 +96,6 @@ jobs:
       - name: Print transformation scenario
         if: inputs.debug
         run: cat "${GITHUB_WORKSPACE}/generator/generator.xpr"
-
-  deploy:
-    needs: build
-    concurrency: ci-${{ github.ref }}
-
-    runs-on: ubuntu-latest
-    steps:
       - name: Deploy to GitHub Pages (using provided PAT)
         if: inputs.deploy_pat != ''
         uses: JamesIves/github-pages-deploy-action@v4
