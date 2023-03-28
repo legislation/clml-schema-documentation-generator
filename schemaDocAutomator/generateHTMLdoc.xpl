@@ -45,7 +45,8 @@
     <p:sink/>
     
     <p:group>
-        <p:variable name="vQuote" select="'&quot;'"/>
+        <!-- PA 11/3/22 - the XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient -->
+        <!--<p:variable name="vQuote" select="'&quot;'"/>-->
         <p:variable name="vTab" select="'&#9;'"/>
         
         <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility -->
@@ -60,9 +61,9 @@
         <p:variable name="vSettingsFolderLocalPath" select="$pWorkingDirectoryPath"/>
         
         <!-- PA 11/3/22 - the XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
-          (see https://www.w3.org/TR/xproc/#c.exec) - using multiple quotes here was breaking paths with spaces on my machine -->
+          (see https://www.w3.org/TR/xproc/#c.exec) - using multiple quotes here was breaking paths with spaces on my machine
         <p:variable name="vOxygenPathQuotes" select='concat($vQuote,$vOxygenPath,$vQuote)'/>
-        <p:variable name="vInputFolderLocalPathQuotes" select='concat($vQuote, $vInputFolderLocalPath, $vQuote)'/>
+        <p:variable name="vInputFolderLocalPathQuotes" select='concat($vQuote, $vInputFolderLocalPath, $vQuote)'/> -->
         <p:variable name="vSettingsTempFilename" select="concat(replace(substring-before(xs:string(current-dateTime()),'.'),':',''),'.xml')"/>
         <p:variable name="vSettingsTempFullPath" select="concat('file:/', $vSettingsFolderLocalPath, '/', $vSettingsTempFilename)"/>
       
@@ -71,7 +72,7 @@
           (see https://www.w3.org/TR/xproc/#c.exec) so using the tab character as a separator instead - note that we have to concat together
           strings that should be part of the *same* argument
         <p:variable name="vOxyArgs" select="string-join(('/C', 'CALL', 'launchOxygen.bat', $vInputFolderLocalPath, concat('-cfg:', $vSettingsFolderLocalPath, '/',$vSettingsTempFilename),$vOxygenPathQuotes), $vTab)"/>  -->
-        <p:variable name="vOxyArgs" select="string-join(($vInputFolderLocalPathQuotes, concat($vQuote, '-cfg:', $vSettingsFolderLocalPath, '/',$vSettingsTempFilename, $vQuote),$vOxygenPathQuotes), $vTab)"/>
+        <p:variable name="vOxyArgs" select="string-join(($vInputFolderLocalPath, concat('-cfg:', $vSettingsFolderLocalPath, '/',$vSettingsTempFilename),$vOxygenPath), $vTab)"/>
          
       <!-- using an exported settings file is handy and makes it easy for people to configure,
           however the filename/path is stored in the file as
