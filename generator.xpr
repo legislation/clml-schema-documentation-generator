@@ -247,7 +247,7 @@
                         <String>pOxygenPath</String>
                       </field>
                       <field name="value">
-                        <String>file:/C:/Users/parnott/AppData/local/programs/Oxygen XML Editor 25/scripts</String>
+                        <String>file:/%%WORKSPACE%%/oxygen/scripts</String>
                       </field>
                     </xprocOption>
                     <xprocOption>
