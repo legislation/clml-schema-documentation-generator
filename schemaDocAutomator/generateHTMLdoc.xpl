@@ -49,8 +49,9 @@
         <p:variable name="vTab" select="'&#9;'"/>
         
         <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility -->
+        <!-- PA 28/3/23 - fixing substitution for Unix systems -->
         <p:variable name="vInputSchemaFileNoExt" select="substring-before($pInputSchemaFile,'.')"/>
-        <p:variable name="vInputFolderLocalPath" select="concat(substring-after($pTempFolder,'file:/'),'/xsd/',$vInputSchemaFileNoExt,'.xsd')"/>
+        <p:variable name="vInputFolderLocalPath" select="concat(replace(replace($pTempFolder,'file:/([A-Za-z]:/)','$1'),'file:',''),'/xsd/',$vInputSchemaFileNoExt,'.xsd')"/>
       
         <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility
         <p:variable name="vOxygenPath" select="replace(substring-after($pOxygenPath,'file:/'),'/','\\')"/>
