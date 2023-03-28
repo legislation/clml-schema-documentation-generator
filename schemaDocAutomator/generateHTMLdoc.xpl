@@ -61,7 +61,7 @@
         <!-- PA 11/3/22 - the XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
           (see https://www.w3.org/TR/xproc/#c.exec) - using multiple quotes here was breaking paths with spaces on my machine -->
         <p:variable name="vOxygenPathQuotes" select='concat($vQuote,$vOxygenPath,$vQuote)'/>
-        <p:variable name="vInputFolderLocalPathQuotes" select='concat($vQuote, $vInputFolderLocalPath, $vQuote'/>
+        <p:variable name="vInputFolderLocalPathQuotes" select='concat($vQuote, $vInputFolderLocalPath, $vQuote)'/>
         <p:variable name="vSettingsTempFilename" select="concat(replace(substring-before(xs:string(current-dateTime()),'.'),':',''),'.xml')"/>
         <p:variable name="vSettingsTempFullPath" select="concat('file:/', $vSettingsFolderLocalPath, '/', $vSettingsTempFilename)"/>
       
