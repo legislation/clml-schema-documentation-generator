@@ -26,7 +26,6 @@
     <xsl:param name="gpStartingURL" as="xs:string"/>
     <xsl:param name="gpUserGuide" as="xs:string?"/>
     <xsl:param name="gpReferenceGuide" as="xs:string"/>
-    <xsl:param name="gpDocFilesSubFolder" as="xs:string?"/>
     
     <xsl:include href="processIncludes.xsl"/>
     
@@ -36,81 +35,29 @@
         <!--<xsl:message>END Processing {base-uri(.)}</xsl:message>-->
     </xsl:template>
     
+    <!-- PA: useful to be able to put comments in HTML that we strip out before publishing -->
     <xsl:template match="comment()"/>
     
-    <!-- PA 5/5/22: support reprocessing of sidebar ToC for user guide -->
+    <!-- PA 6/10/22: support reprocessing of frameset for iframe usage -->
     <xsl:template match="head">
         <xsl:copy copy-namespaces="no">
             <xsl:apply-templates/>
-            
-            <xsl:if test="ends-with(document-uri(root()), concat('/', $gpUserGuide))">
-                <script type="text/javascript">
-                var userGuideIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexUserGuide.html';
-                if (!!parent.indexFrame) {{
-                  if (!(parent.indexFrame.location.pathname.endsWith(userGuideIndexPage))) {{
-                    parent.indexFrame.location = userGuideIndexPage;
-                  }}
-                }}
-                </script>
-            </xsl:if>
-            
-            <xsl:if test="matches(document-uri(root()), '(\.index[a-zA-Z]+|schHierarchy)\.html?$')">
-                <script type="text/javascript">
-                var startIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexListcomp.html';
-                var userGuideIndexPage = '<xsl:value-of select="substring-before($gpReferenceGuide, '.html')"/>.indexUserGuide.html';
-                
-                document.addEventListener('DOMContentLoaded', function() {{
-                    var startPageLink = document.getElementById('startPageLink');
-                    var userGuideLink = document.getElementById('userGuideLink');
-                    
-                    startPageLink.addEventListener('click', function(e) {{
-                        if (!(window.location.pathname.endsWith(startIndexPage))) {{
-                            window.location = startIndexPage;
-                        }}
-                    }});
-                    userGuideLink.addEventListener('click', function(e) {{
-                        if (!(window.location.pathname.endsWith(userGuideIndexPage))) {{
-                            window.location = userGuideIndexPage;
-                        }}
-                    }});
-                }});
-                </script>
+            <xsl:if test="not(matches(document-uri(root()), '(\.index[a-zA-Z]+|schHierarchy)\.html?$'))">
+                <link rel="stylesheet" type="text/css" href="frames.css"/>
             </xsl:if>
         </xsl:copy>
     </xsl:template>
     
-    <!-- PA 6/5/22: add support for doc files sub-folder -->
     <xsl:template match="link[@rel='stylesheet']">
         <xsl:copy copy-namespaces="no">
-            <xsl:copy-of select="@* except @href"/>
-            <xsl:attribute name="href">
-                <xsl:choose>
-                    <xsl:when test="$gpDocFilesSubFolder and ends-with(document-uri(root()), concat('/', $gpReferenceGuide))">
-                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', @href)"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="@href"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
+            <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:copy>
     </xsl:template>
     
-    <!-- PA 6/5/22: add support for doc files sub-folder -->
     <xsl:template match="script[@src]">
         <xsl:copy copy-namespaces="no">
-            <xsl:copy-of select="@* except @src"/>
-            <xsl:attribute name="src">
-                <xsl:choose>
-                    <xsl:when test="$gpDocFilesSubFolder and ends-with(document-uri(root()), concat('/', $gpReferenceGuide))">
-                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', @src)"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="@src"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
+            <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </xsl:copy>
     </xsl:template>
@@ -119,44 +66,27 @@
         <xsl:copy-of select="."/>
     </xsl:template>
     
-    <xsl:template match="frame[@name='mainFrame']">
+    <!-- PA 6/10/22: add iframe nav to all pages, except nav pages themselves -->
+    <xsl:template match="body[not(matches(document-uri(root()), '(\.index[a-zA-Z]+|schHierarchy)\.html?$'))]">
+        <xsl:variable name="vSidebarPageUri">
+            <xsl:choose>
+                <xsl:when test="ends-with(document-uri(root()), concat('/', $gpUserGuide))">
+                    <xsl:value-of select="concat(substring-before($gpReferenceGuide, '.html'), '.indexUserGuide.html')"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="concat(substring-before($gpReferenceGuide, '.html'), '.indexListcomp.html')"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:copy copy-namespaces="no">
-            <xsl:copy-of select="@*"/>
-            <!-- PA 6/5/22: add support for doc files sub-folder -->
-            <xsl:attribute name="src">
-                <xsl:choose>
-                    <xsl:when test="$gpDocFilesSubFolder">
-                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', $gpStartingURL)"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="$gpStartingURL"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
-        </xsl:copy>
-    </xsl:template>
-    
-    <!-- showing toc be namespace by default gives users most useful element list -->
-    <xsl:template match="frame[@name='indexFrame']">
-        <xsl:variable name="vDefaultIndexPage" select="concat(substring-before($gpReferenceGuide,'.html'),'.indexListcomp.html')"/>
-        <xsl:copy copy-namespaces="no">
-            <xsl:copy-of select="@*"/>
-            <!-- PA 6/5/22: add support for doc files sub-folder -->
-            <xsl:attribute name="src">
-                <xsl:choose>
-                    <xsl:when test="$gpDocFilesSubFolder">
-                        <xsl:value-of select="concat($gpDocFilesSubFolder, '/', $vDefaultIndexPage)"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="$vDefaultIndexPage"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
-
-            <!-- e.g. list by component
-            <xsl:attribute name="src" select="'reference.indexListcomp.html'"/>
-            or list by namespace
-            <xsl:attribute name="src" select="'reference.indexListns.html'"/> -->
+            <xsl:copy-of select="@* except @src"/>
+            <iframe id="nav">
+                <xsl:attribute name="src">
+                    <xsl:value-of select="$vSidebarPageUri"/>
+                </xsl:attribute>
+                <xsl:text> </xsl:text>
+            </iframe>
+            <xsl:apply-templates/>
         </xsl:copy>
     </xsl:template>
     
@@ -195,10 +125,10 @@
     <xsl:template match="h2[.='Table of Contents']" priority="+1">
         <xsl:next-match/>
         <!-- replace with a parameter -->
-				<!-- PA 5/5/22: Add link to return to start page -->
+		<!-- PA 5/5/22: Add link to return to start page -->
         <p>
-            <a href="{$gpStartingURL}" target="mainFrame" id="startPageLink">Start Page</a> | 
-            <a href="{$gpUserGuide}" target="mainFrame" id="userGuideLink">User Guide</a></p>
+            <a href="{$gpStartingURL}" target="_top" id="startPageLink">Start Page</a> | 
+            <a href="{$gpUserGuide}" target="_top" id="userGuideLink">User Guide</a></p>
     </xsl:template>
     
     
@@ -283,13 +213,23 @@
         </xsl:choose>
     </xsl:template>
     
+    <!-- PA 6/10/2022: fix link target to be "_top" instead of "mainFrame", due to nav now being in iframe -->
+    <xsl:template match="a/@target[. = 'mainFrame']" priority="+1">
+        <xsl:attribute name="target">
+            <xsl:text>_top</xsl:text>
+        </xsl:attribute>
+    </xsl:template>
+    
+    <!-- PA 6/10/2022: fix links to not change title via JS (unnecessary, saves file size) -->
+    <xsl:template match="a/@onclick[starts-with(., 'updatePageTitle')]" priority="+1"/>
+    
     <!-- change any static links to the reference guide to the name supplied 
         in order to save the user form manually changing for every version if 
         the reference filename contains version  -->
     <xsl:template match="a/@href[starts-with(.,'reference.html') and $gpReferenceGuide]" priority="+1">
         <xsl:attribute name="href">
             <!-- PA 6/5/22: add support for doc files sub-folder -->
-            <xsl:value-of select="concat(if ($gpDocFilesSubFolder) then '../' else '', $gpReferenceGuide)"/>
+            <xsl:value-of select="$gpReferenceGuide"/>
             <xsl:if test="contains(.,'#')">
                 <xsl:text>#</xsl:text>
                 <xsl:value-of select="substring-after(.,'#')"/>

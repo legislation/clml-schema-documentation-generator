@@ -36,7 +36,6 @@
     <p:option required="true" name="pOxySettingsFilename"/>
     <p:option required="true" name="pOxygenPath"/>
     <p:option required="true" name="pOutputFolder"/>
-    <p:option required="true" name="pDocFilesSubFolder"/>
     
     <p:import href="library-1.0.xpl"/>
     <p:import href="getFolderList.xpl"/>
@@ -48,14 +47,13 @@
     <p:group>
         <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility -->
         <p:variable name="vInputSchemaFileNoExt" select="substring-before($pInputSchemaFile,'.')"/>
-        <p:variable name="vInputFolderWinPath" select="concat(substring-after($pTempFolder,'file:/'),'/xsd/',$vInputSchemaFileNoExt,'.xsd')"/>
-        <p:variable name="vOutputFolderWinPath" select="substring-after($pOxygenOutputFolder,'file:/')"/>
+        <p:variable name="vInputFolderLocalPath" select="concat(substring-after($pTempFolder,'file:/'),'/xsd/',$vInputSchemaFileNoExt,'.xsd')"/>
       
         <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility
         <p:variable name="vOxygenPath" select="replace(substring-after($pOxygenPath,'file:/'),'/','\\')"/>
-        <p:variable name="vSettingsFolderWinPath" select="replace($pWorkingDirectoryPath,'/','\\')"/> -->
+        <p:variable name="vSettingsFolderLocalPath" select="replace($pWorkingDirectoryPath,'/','\\')"/> -->
         <p:variable name="vOxygenPath" select="substring-after($pOxygenPath,'file:/')"/>
-        <p:variable name="vSettingsFolderWinPath" select="$pWorkingDirectoryPath"/>
+        <p:variable name="vSettingsFolderLocalPath" select="$pWorkingDirectoryPath"/>
         
         <!-- PA 11/3/22 - the XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
           (see https://www.w3.org/TR/xproc/#c.exec) - using multiple quotes here was breaking paths with spaces on my machine -->
@@ -63,13 +61,14 @@
         <p:variable name="vTab" select="'&#9;'"/>
         <p:variable name="vOxygenPathQuotes" select='concat($vQuote,$vOxygenPath,$vQuote)'/>
         <p:variable name="vSettingsTempFilename" select="concat(replace(substring-before(xs:string(current-dateTime()),'.'),':',''),'.xml')"/>
+        <p:variable name="vSettingsTempFullPath" select="concat('file:/', $vSettingsFolderLocalPath, '/', $vSettingsTempFilename)"/>
       
         <!-- PA 11/3/22 - changing launchOxygen script call to enable cross-platform compatibility
           The XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
           (see https://www.w3.org/TR/xproc/#c.exec) so using the tab character as a separator instead - note that we have to concat together
           strings that should be part of the *same* argument
-        <p:variable name="vOxyArgs" select="string-join(('/C', 'CALL', 'launchOxygen.bat', $vInputFolderWinPath, concat('-cfg:', $vSettingsFolderWinPath, '/',$vSettingsTempFilename),$vOxygenPathQuotes), $vTab)"/>  -->
-        <p:variable name="vOxyArgs" select="string-join(($vInputFolderWinPath, concat('-cfg:', $vSettingsFolderWinPath, '/',$vSettingsTempFilename),$vOxygenPathQuotes), $vTab)"/>
+        <p:variable name="vOxyArgs" select="string-join(('/C', 'CALL', 'launchOxygen.bat', $vInputFolderLocalPath, concat('-cfg:', $vSettingsFolderLocalPath, '/',$vSettingsTempFilename),$vOxygenPathQuotes), $vTab)"/>  -->
+        <p:variable name="vOxyArgs" select="string-join(($vInputFolderLocalPath, concat('-cfg:', $vSettingsFolderLocalPath, '/',$vSettingsTempFilename),$vOxygenPathQuotes), $vTab)"/>
          
       <!-- using an exported settings file is handy and makes it easy for people to configure,
           however the filename/path is stored in the file as
@@ -89,7 +88,7 @@
             <p:with-option name="replace" select="concat('&quot;',$pOxygenOutputFolder,'/',$pReferenceGuide,'&quot;')"/>
           </p:string-replace>
           <p:store>
-            <p:with-option name="href" select="$vSettingsTempFilename"/>
+            <p:with-option name="href" select="$vSettingsTempFullPath"/>
           </p:store>
         </p:group>
         <!--<p:try>-->
@@ -140,8 +139,7 @@
             <p:filter select="//*:file[ends-with(@name,'.html') or ends-with(@name,'.htm')]"/> 
             <p:for-each name="iterateHTML" >
               <p:variable name="vHTMLfilename" select="/*/@relname"/>
-              <!-- PA 6/5/22: add support for doc files sub-folder -->
-              <p:variable name="vOutputPath" select="concat($pOutputFolder,'/', if (not($vHTMLfilename = $pReferenceGuide) and normalize-space($pDocFilesSubFolder)) then concat($pDocFilesSubFolder, '/') else '', $vHTMLfilename)"/>
+              <p:variable name="vOutputPath" select="concat($pOutputFolder,'/', $vHTMLfilename)"/>
               <p:variable name="vFullPathInputHTML" select="concat($pOxygenOutputFolder, '/', $vHTMLfilename)"/>
               <cx:message>
                   <p:with-option name="message" select="concat('HTML post processing ',$vFullPathInputHTML)"/>
@@ -157,12 +155,10 @@
                   <p:with-param name="gpExtraDocFolder" select="$pExtraDocFolder"/>
                   <p:with-param name="gpSampleXmlFolder" select="$pSampleXmlFolder"/>
                   <p:with-param name="gpOutputFolder" select="$pOutputFolder"/>
-                  <p:with-param name="gpDocFilesSubFolder" select="$pDocFilesSubFolder"/>
                   <p:with-param name="gpStartingURL" select="$pStartURL"/>
                   <p:with-param name="gpUserGuide" select="$pUserGuide"/>
                   <p:with-param name="gpReferenceGuide" select="$pReferenceGuide"/>
               </p:xslt>
-              <!-- PA 6/5/22: add support for doc files sub-folder -->
               <p:store name="htmlOut">
                 <p:with-option name="href" select="$vOutputPath"/>
               </p:store> 
@@ -181,25 +177,14 @@
               <cx:message>
                   <p:with-option name="message" select="concat('Moving ',$vFullPathInput, ' to ', $pOutputFolder, '/', $vFilename)"/>
               </cx:message>
-              <!-- PA 6/5/22: add support for doc files sub-folder -->
-              <p:choose>
-                <p:when test="normalize-space($pDocFilesSubFolder)">
-                  <cxf:move>
-                    <p:with-option name="href" select="$vFullPathInput"/>
-                    <p:with-option name="target" select="concat($pOutputFolder, '/', $pDocFilesSubFolder, '/', $vFilename)"/>
-                  </cxf:move>
-                </p:when>
-                <p:otherwise>
-                  <cxf:move>
-                    <p:with-option name="href" select="$vFullPathInput"/>
-                    <p:with-option name="target" select="concat($pOutputFolder, '/', $vFilename)"/>
-                  </cxf:move>
-                </p:otherwise>
-              </p:choose>
+              <cxf:move>
+                <p:with-option name="href" select="$vFullPathInput"/>
+                <p:with-option name="target" select="concat($pOutputFolder, '/', $vFilename)"/>
+              </cxf:move>
             </p:for-each>
           
             <cxf:delete>
-              <p:with-option name="href" select="$vSettingsTempFilename"/>
+              <p:with-option name="href" select="$vSettingsTempFullPath"/>
             </cxf:delete>
             <p:identity>
               <p:input port="source">

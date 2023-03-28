@@ -1,0 +1,98 @@
+name: manual-build
+run-name: Manual build of docs from branch @${{ inputs.branch }} by @${{ github.actor }}
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Repository where CLML schema is located (default: legislation/clml-schema)'
+        required: true
+        default: 'legislation/clml-schema'
+        type: string
+      ref:
+        description: 'Branch, tag or commit to use to build documentation (default: master)'
+        required: true
+        default: 'master'
+        type: string
+      deploy_repository:
+        description: 'Repository to which to deploy generated documentation (default: legislation/clml-schema)'
+        required: true
+        default: 'legislation/clml-schema'
+        type: string
+      deploy_branch:
+        description: 'Branch to which to deploy documentation (default: github-pages)'
+        required: true
+        default: 'github-pages'
+        type: string
+      java_version:
+        description: 'Version of Java to use to build documentation (default: 17)'
+        required: true
+        default: '17'
+        type: string
+      oxygen_version:
+        description: 'Version of oXygen to use to build documentation (default: 25.1)'
+        required: true
+        default: '25.1'
+        type: string
+      deploy_pat:
+        description: 'GitHub personal access token to use to deploy generated documentation (default: the value of the repository secret PAGES_DEPLOY_PAT)
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout documentation generator
+        uses: actions/checkout@v3
+        with:
+          path: generator
+      - name: Checkout CLML schema
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.repository }}
+          ref: ${{ inputs.ref }}
+          path: clml-schema
+      - name: Setup Java ${{ inputs.java_version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: ${{ inputs.java_version }}
+      - name: Setup oXygen Scripting ${{ inputs.oxygen_version }}
+        run: |
+          echo "::group::Downloading oXygen ${{ inputs.oxygen_version }}"
+          wget "https://archives.oxygenxml.com/Oxygen/Editor/InstData${OXYGEN_VERSION}/All/oxygen.tar.gz"
+          echo "::endgroup"
+          echo "::group::Extracting oXygen"
+          tar xf oxygen.tar.gz --one-top-level
+          echo "::endgroup"
+          echo "::group::Applying oXygen licence"
+          echo "$OXYGEN_LICENCE_KEY" > oxygen/scriptinglicensekey.txt
+          echo "::endgroup"
+        env:
+          OXYGEN_LICENCE_KEY: ${{ secrets.OXYGEN_LICENCE_KEY }}
+          OXYGEN_VERSION: ${{ inputs.oxygen_version }}
+      - name: Run schema documentation generator transform
+        run: "$GITHUB_WORKSPACE"/scripts/transform.sh -i "${GITHUB_WORKSPACE}/generator/schemaDocAutomator/generateSchemaDoc.xpl" -sn generateSchemaDoc -s -i "${GITHUB_WORKSPACE}/generator/generatorFilled.xpr" -v
+
+  deploy:
+    needs: build
+    concurrency: ci-${{ github.ref }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages (using provided PAT)
+        if: ${{ inputs.deploy_pat != '' }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: final-output
+          token: ${{ inputs.deploy_pat }}
+          branch: ${{ inputs.deploy_branch }}
+          repository-name: ${{ inputs.deploy_repository }}
+    steps:
+      - name: Deploy to GitHub Pages (using default PAT in repository secret)
+        if: ${{ inputs.deploy_pat == '' }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: final-output
+          token: ${{ secrets.PAGES_DEPLOY_PAT }}
+          branch: ${{ inputs.deploy_branch }}
+          repository-name: ${{ inputs.deploy_repository }}

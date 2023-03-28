@@ -1,2 +1,8 @@
 tests/processIncludes-result.html
 tests/xspec/
+
+schemaDocAutomator/*.xml
+!schemaDocAutomator/oxygenSettings.xml
+
+*.xpr
+!generator.xpr

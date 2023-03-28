@@ -7,6 +7,16 @@
     xmlns:leg="http://www.legislation.gov.uk/namespaces/legislation"
     xmlns:xh="http://www.w3.org/1999/xhtml" version="1.0">
   
+  <!-- NB:
+    
+    If you get the error:
+      net.sf.saxon.s9api.SaxonApiException: The supplied node has been schema-validated, 
+      but the XPath expression was compiled without schema-awareness The supplied node 
+      has been schema-validated, but the XPath expression was compiled without 
+      schema-awareness
+    Then edit lib/xproc/calabash/lib/saxon.config edition to "PE"
+    -->
+  
   <p:documentation>
     <h:p>Top-level XProc script to run to produce schema documentation.</h:p>
     <h:p>Prepares schemas, ingests mapped content and Generates HTML schema documentation using Oxygen.</h:p>
@@ -38,17 +48,17 @@
       <h:li>pUserGuide - the name of the user guide skeleton XHTML to be processed after the reference guide has been created. This is also the filename that the final HTML output file for the user guide will use. If this is empty then no user guide will be processed and no link to the user guide created in the reference guide navigation.</h:li>
       <h:li>pOxySettingsFilename - the name of the Oxygen XSD generation settings file.</h:li>
       <h:li>pOxygenOutputFolder - the URI of the folder to which Oxygen output will be written (note: this folder is cleaned out at the start of processing)</h:li>
-      <h:li>pOxygenPath - the location of Oxygen on your installation (used for calling the Oxygen v21 program to generate schema diagrams and TML documentation) </h:li>
+      <h:li>pOxygenPath - the directory containing oXygen's schemaDocumentation.bat (which generates schema diagrams and XML documentation) - note that in newer versions of oXygen this batch file is in a scripts/ subdirectory of the program root, not the root install directory itself!</h:li>
       <h:li>pOutputFolder - the URI of the folder to which the final output will be written by this script (note: this folder is cleaned out at the start of processing)</h:li>
     </h:ul>
     <h:h1>Other Configuration</h:h1>
     <h:p>This software has been tested with oXygen XML Editor 21.0, build 2019022207</h:p>
     <h:p>As the XSLT is XSLT3, a suitable version of Saxon is required. As the XSLTs use the <code>xsl:evaluate</code> element then a Professional (PE) version or Enterprise (EE) version or any version after v10 is required.</h:p>
     <h:p>If the Oxygen schema documentation is to be run in a scheduled automatic fashion then a script licence is required. see <a href="https://www.oxygenxml.com/oxygen_scripting.html">https://www.oxygenxml.com/oxygen_scripting.html</a>.</h:p>
-    <h:p><h:b>The launchOxygen.bat and trang.bat files must be edited so that the paths used internally are correct for the deployed environment.</h:b></h:p>
+    <h:p><h:b>The trang.bat script must be edited so that the paths used internally are correct for the deployed environment.</h:b></h:p>
   </p:documentation>
   
-  <p:option required="false" name="pWorkingDirectoryPath" select="'C:/Users/colin/schemaDoc/schemaDocAutomator'"/>
+  <p:option required="false" name="pWorkingDirectoryPath" select="'C:/schemaDoc/schemaDocAutomator'"/>
   
   <!--Prototype test of RNG
   <p:option required="false" name="pInputFolderUri" select="'./testRngInput'"/>
@@ -56,22 +66,21 @@
   <p:option required="false" name="pReferenceGuide" select="'a-reference.html'"/>
   <p:option required="false" name="pStartURL" select="'a.html#Legislation'"/>-->
   
-  <p:option required="false" name="pInputFolderUri" select="'file:/C:/Users/colin/unified-master-schema'"/>
+  <p:option required="false" name="pInputFolderUri" select="'file:/C:/unified-master-schema'"/>
   <p:option required="false" name="pInputSchemaFile" select="'schema/legislation.xsd'"/>
-  <p:option required="false" name="pExtraDocFolder" select="'file:/C:/Users/colin/unified-master-schema/schemaDoc/CLMLfiles/extraDocFolder'"/>
+  <p:option required="false" name="pExtraDocFolder" select="'file:/C:/unified-master-schema/schemaDoc/CLMLfiles/extraDocFolder'"/>
   <p:option required="false" name="pHtmlAssetsSubFolder" select="'img'"/>
   <p:option required="false" name="pAdditionalHtmlSubFolder" select="'html'"/> <!-- PA 5/5/2022 copy additional HTML to output folder -->
   <p:option required="false" name="pAdditionalCssSubFolder" select="'css'"/> <!-- PA 5/5/2022 copy additional HTML to output folder -->
-  <p:option required="false" name="pSampleXmlFolder" select="'file:/C:/Users/colin/unified-master-schema/schemaDoc/CLMLfiles/sampleXML'"/>
+  <p:option required="false" name="pSampleXmlFolder" select="'file:/C:/unified-master-schema/schemaDoc/CLMLfiles/sampleXML'"/>
   <p:option required="false" name="pSchemaMapFile" select="'schemaId2doc.map'"/>
   <p:option required="false" name="pReferenceGuide" select="'CLMLreferenceGuide-v2-2.html'"/>
   <p:option required="false" name="pStartURL" select="'schemaLegislationCore_xsd.html#Legislation'"/>
   <p:option required="false" name="pUserGuide" select="'CLMLuserGuide-v2-2.html'"/>
   
-  <p:option required="false" name="pTempFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/temp/schemaTempFolder'"/>
-  <p:option required="false" name="pOxygenOutputFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/temp/oxygenOutput'"/>
-  <p:option required="false" name="pOutputFolder" select="'file:/C:/Users/colin/Documents/newco/TSO/TNA/schemaDoc/finalOutput'"/>
-  <p:option required="false" name="pDocFilesSubFolder" select="''"/>
+  <p:option required="false" name="pTempFolder" select="'file:/C:/schemaDoc/temp/schemaTempFolder'"/>
+  <p:option required="false" name="pOxygenOutputFolder" select="'file:/C:/schemaDoc/temp/oxygenOutput'"/>
+  <p:option required="false" name="pOutputFolder" select="'file:/C:/schemaDoc/finalOutput'"/>
   
   <p:option required="false" name="pOxySettingsFilename" select="'oxygenSettings.xml'"/>
   <p:option required="false" name="pOxygenPath" select="'file:/C:/Program Files/Oxygen XML Editor 21'"/>
@@ -94,7 +103,7 @@
   <!--<p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>-->
   <p:import href="library-1.0.xpl"/>
   
-  <p:variable name="vDocFilesDestination" select="concat($pOutputFolder, if (normalize-space($pDocFilesSubFolder)) then concat('/', $pDocFilesSubFolder) else '')"/>
+  <p:variable name="vDocFilesDestination" select="$pOutputFolder"/>
  
   <p:group>
      <!-- need to clear out temp and output folders-->
@@ -107,16 +116,6 @@
      <cm:deleteAndMakeFolder>
        <p:with-option name="pFolder" select="$pOutputFolder"/>
      </cm:deleteAndMakeFolder>
-     <p:choose>
-       <p:when test="normalize-space($pDocFilesSubFolder)">
-         <cm:deleteAndMakeFolder>
-           <p:with-option name="pFolder" select="$vDocFilesDestination"/>
-         </cm:deleteAndMakeFolder>
-       </p:when>
-       <p:otherwise>
-         <p:identity/>
-       </p:otherwise>
-     </p:choose>
      <p:choose>
        <p:when test="ends-with($pInputSchemaFile,'rng')">
          <cm:rng2xsd>
@@ -152,12 +151,11 @@
       <p:with-option name="pOxygenPath" select="$pOxygenPath"/>
       <p:with-option name="pOxySettingsFilename" select="$pOxySettingsFilename"/>
       <p:with-option name="pOutputFolder" select="$pOutputFolder"/>
-      <p:with-option name="pDocFilesSubFolder" select="$pDocFilesSubFolder"/>
     </cm:generateHTMLdoc>
      
     <!-- now process the user guide-->
     <cm:populateHTMLdoc>
-      <p:with-option name="pHtmlFilename" select="$pUserGuide"/>
+       <p:with-option name="pHtmlFilename" select="$pUserGuide"/>
       <p:with-option name="pExtraDocFolder" select="$pExtraDocFolder"/>
       <p:with-option name="pSampleXmlFolder" select="$pSampleXmlFolder"/>
       <p:with-option name="pReferenceGuide" select="$pReferenceGuide"/>
@@ -177,7 +175,7 @@
     <!-- then copy any supporting files into the output -->
     <cm:copyFiles>
       <p:with-option name="pInputFolder" select="concat($pExtraDocFolder,'/',$pHtmlAssetsSubFolder)"/>
-      <p:with-option name="pOutputFolder" select="concat($vDocFilesDestination,'/',$pHtmlAssetsSubFolder)"/>
+      <p:with-option name="pOutputFolder" select="concat($vDocFilesDestination, '/', $pHtmlAssetsSubFolder)"/>
     </cm:copyFiles>
     
     <!-- PA 5/5/2022 copy additional CSS to output folder -->

@@ -54,7 +54,7 @@
         <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@* except @href"/>
             <xsl:attribute name="href" select="concat($gpUserGuide, '#', substring-after(@href, '#'))"/>
-            <xsl:attribute name="target">mainFrame</xsl:attribute>
+            <xsl:attribute name="target">_top</xsl:attribute>
             <xsl:apply-templates mode="#current"/>
         </xsl:copy>
     </xsl:template>
