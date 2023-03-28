@@ -1,5 +1,5 @@
 name: manual-build
-run-name: Manual build of docs from branch @${{ inputs.branch }} by @${{ github.actor }}
+run-name: Manual build of docs from @${{ inputs.repository }}/@${{ inputs.ref }} by @${{ github.actor }}
 on:
   workflow_dispatch:
     inputs:
@@ -34,7 +34,7 @@ on:
         default: '25.1'
         type: string
       deploy_pat:
-        description: 'GitHub personal access token to use to deploy generated documentation (default: the value of the repository secret PAGES_DEPLOY_PAT)
+        description: 'GitHub personal access token to use to deploy generated documentation (default: the value of the repository secret PAGES_DEPLOY_PAT)'
         type: string
 
 jobs:
@@ -48,14 +48,14 @@ jobs:
       - name: Checkout CLML schema
         uses: actions/checkout@v3
         with:
-          repository: ${{ inputs.repository }}
-          ref: ${{ inputs.ref }}
+          repository: inputs.repository
+          ref: inputs.ref
           path: clml-schema
       - name: Setup Java ${{ inputs.java_version }}
         uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
-          java-version: ${{ inputs.java_version }}
+          java-version: inputs.java_version
       - name: Setup oXygen Scripting ${{ inputs.oxygen_version }}
         run: |
           echo "::group::Downloading oXygen ${{ inputs.oxygen_version }}"
@@ -68,10 +68,10 @@ jobs:
           echo "$OXYGEN_LICENCE_KEY" > oxygen/scriptinglicensekey.txt
           echo "::endgroup"
         env:
-          OXYGEN_LICENCE_KEY: ${{ secrets.OXYGEN_LICENCE_KEY }}
-          OXYGEN_VERSION: ${{ inputs.oxygen_version }}
+          OXYGEN_LICENCE_KEY: secrets.OXYGEN_LICENCE_KEY
+          OXYGEN_VERSION: inputs.oxygen_version
       - name: Run schema documentation generator transform
-        run: "$GITHUB_WORKSPACE"/scripts/transform.sh -i "${GITHUB_WORKSPACE}/generator/schemaDocAutomator/generateSchemaDoc.xpl" -sn generateSchemaDoc -s -i "${GITHUB_WORKSPACE}/generator/generatorFilled.xpr" -v
+        run: '"${GITHUB_WORKSPACE}/scripts/transform.sh" -i "${GITHUB_WORKSPACE}/generator/schemaDocAutomator/generateSchemaDoc.xpl" -sn generateSchemaDoc -s -i "${GITHUB_WORKSPACE}/generator/generatorFilled.xpr" -v'
 
   deploy:
     needs: build
@@ -80,16 +80,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages (using provided PAT)
-        if: ${{ inputs.deploy_pat != '' }}
+        if: inputs.deploy_pat != ''
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: final-output
           token: ${{ inputs.deploy_pat }}
           branch: ${{ inputs.deploy_branch }}
           repository-name: ${{ inputs.deploy_repository }}
-    steps:
       - name: Deploy to GitHub Pages (using default PAT in repository secret)
-        if: ${{ inputs.deploy_pat == '' }}
+        if: inputs.deploy_pat == ''
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: final-output
