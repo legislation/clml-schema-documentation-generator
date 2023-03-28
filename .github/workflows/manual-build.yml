@@ -75,7 +75,7 @@ jobs:
       - name: Run schema documentation generator transform
         run: '"${GITHUB_WORKSPACE}/oxygen/scripts/transform.sh" -i "${GITHUB_WORKSPACE}/generator/schemaDocAutomator/generateSchemaDoc.xpl" -sn generateSchemaDoc -s "${GITHUB_WORKSPACE}/generator/generator.xpr" -v'
       - name: 'Rename welcome.html to index.html (if required)'
-        run: '[[ -f "${GITHUB_WORKSPACE}/final-output/welcome.html" ]] && [[ !-f "${GITHUB_WORKSPACE}/final-output/index.html" ]] && mv "${GITHUB_WORKSPACE}/final-output/welcome.html" "${GITHUB_WORKSPACE}/final-output/index.html"'
+        run: test -f "${GITHUB_WORKSPACE}/final-output/welcome.html" && test ! -f "${GITHUB_WORKSPACE}/final-output/index.html" && mv "${GITHUB_WORKSPACE}/final-output/welcome.html" "${GITHUB_WORKSPACE}/final-output/index.html"
 
   deploy:
     needs: build
