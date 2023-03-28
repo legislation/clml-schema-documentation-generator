@@ -5,4 +5,3 @@ schemaDocAutomator/*.xml
 !schemaDocAutomator/oxygenSettings.xml
 
 *.xpr
-!generator.xpr
