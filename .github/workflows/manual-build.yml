@@ -80,7 +80,16 @@ jobs:
       - name: Run schema documentation generator transform
         run: '"${GITHUB_WORKSPACE}/oxygen/scripts/transform.sh" -i "${GITHUB_WORKSPACE}/generator/schemaDocAutomator/generateSchemaDoc.xpl" -sn generateSchemaDoc -s "${GITHUB_WORKSPACE}/generator/generator.xpr" -v'
       - name: 'Rename welcome.html to index.html (if required)'
-        run: test -f "${GITHUB_WORKSPACE}/final-output/welcome.html" && test ! -f "${GITHUB_WORKSPACE}/final-output/index.html" && mv "${GITHUB_WORKSPACE}/final-output/welcome.html" "${GITHUB_WORKSPACE}/final-output/index.html"
+        run: |
+          if test -f "${GITHUB_WORKSPACE}/final-output/welcome.html"; then
+            if test ! -f "${GITHUB_WORKSPACE}/final-output/index.html"; then
+              mv "${GITHUB_WORKSPACE}/final-output/welcome.html" "${GITHUB_WORKSPACE}/final-output/index.html"
+            else
+              echo "index.html already exists, not overwriting"
+            fi
+          else
+            echo "welcome.html doesn't exist, not moving"
+          fi
       - name: List all files in workspace
         if: inputs.debug
         run: find "${GITHUB_WORKSPACE}"

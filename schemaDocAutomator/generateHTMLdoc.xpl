@@ -86,7 +86,7 @@
             <p:with-option name="href" select="$pOxySettingsFilename"/>
           </p:load>
           <cx:message>
-            <p:with-option name="message" select="concat('!!!! vOxygenPathQuotes ',$vOxygenPathQuotes, ' vOxyArgs ', $vOxyArgs)"/>
+            <p:with-option name="message" select="concat('!!!! vOxygenPath ',$vOxygenPath, ' vOxyArgs ', $vOxyArgs)"/>
           </cx:message>
           <p:string-replace match="/serialized/serializableOrderedMap/entry/xsdDocumentationOptions/field[@name='unexpandedOutputFile']/String/text()">
             <p:with-option name="replace" select="concat('&quot;',$pOxygenOutputFolder,'/',$pReferenceGuide,'&quot;')"/>
