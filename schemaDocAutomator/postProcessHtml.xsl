@@ -7,8 +7,9 @@
     xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://www.w3.org/1999/xhtml" 
 	xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:leg="http://www.legislation.gov.uk/namespaces/legislation"
 	xmlns:ukm="http://www.legislation.gov.uk/namespaces/metadata"
+	xmlns:fo="http://www.w3.org/1999/XSL/Format"
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
-    exclude-result-prefixes="xs a rng cm ci err xhtml dc leg ukm" expand-text="true"
+    exclude-result-prefixes="xs a rng cm ci err xhtml dc leg ukm fo" expand-text="true"
     version="3.0">
     <doc xmlns="http://www.oxyegnxml.com/ns/doc/xsl">
         <p>This XSLT post-processes Oxygen XSD documentation html (or any user guide HTML) for user guide and help content.</p>
@@ -18,6 +19,9 @@
         <p>For a description of the custom include mechanism and its attributes please refer to the documentation in "processIncludes.xsl"</p>
     </doc>
     
+    <!-- PA 15/5/23: have to output XHTML here - can't use HTML5 because the XProc pipeline
+        that calls this expects XML and will mangle HTML
+       If/when we move away from XProc, change this to output HTML5 -->
     <xsl:output indent="false" method="xhtml" encoding="UTF-8" />
     
     <xsl:mode name="toc" on-no-match="shallow-skip"/>
@@ -42,9 +46,14 @@
     <xsl:template match="head">
         <xsl:copy copy-namespaces="no">
             <xsl:apply-templates/>
-            <xsl:if test="not(matches(document-uri(root()), '(\.index[a-zA-Z]+|schHierarchy)\.html?$'))">
-                <link rel="stylesheet" type="text/css" href="frames.css"/>
-            </xsl:if>
+            <xsl:choose>
+                <xsl:when test="matches(document-uri(root()), '(\.index[a-zA-Z]+|schHierarchy)\.html?$')">
+                    <link rel="stylesheet" type="text/css" href="sidebar.css"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <link rel="stylesheet" type="text/css" href="frames.css"/>
+                </xsl:otherwise>
+            </xsl:choose>
         </xsl:copy>
     </xsl:template>
     
@@ -99,7 +108,8 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:template match="div[@class='section']/*[self::h2 or self::h3 or self::h4 or self::h5]">
+    <!-- PA 15/5/2023 - only generate IDs for h2-h4 -->
+    <xsl:template match="div[@class='section']/*[self::h2 or self::h3 or self::h4]">
         <xsl:copy copy-namespaces="no">
             <xsl:attribute name="id">
               <xsl:apply-templates select="." mode="generate-slug"/>
@@ -123,6 +133,7 @@
     
     <!-- add in link to user guide -->
     <xsl:template match="h2[.='Table of Contents']" priority="+1">
+        <h1 class="banner"><img src="img/site_logo_legislation.gif" alt="legislation.gov.uk"/> Crown Legislation Markup Language (CLML) Reference</h1>
         <xsl:next-match/>
         <!-- replace with a parameter -->
 		<!-- PA 5/5/22: Add link to return to start page -->
@@ -187,7 +198,7 @@
         <xsl:variable name="vAnchor" select="substring(@href, 2)"/>
         <xsl:choose>
             <xsl:when test="key('kId', $vAnchor, root(.))">
-                <xsl:copy-of select="."/>
+                <xsl:copy-of select="." copy-namespaces="no"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:variable name="vAnchorAltRegex" select="string-join(('', tokenize($vAnchor, '(-| )+'), ''), '.*')"/>
@@ -213,6 +224,12 @@
         </xsl:choose>
     </xsl:template>
     
+    <!-- PA 15/5/2023: td/@width is not valid HTML any more, so strip it out of processed HTML -->
+    <xsl:template match="td/@width"/>
+
+    <!-- PA 15/5/2023: img/@border is not valid HTML any more, so strip it out of processed HTML (unless non-zero) -->
+    <xsl:template match="img/@border[. = 0]"/>
+
     <!-- PA 6/10/2022: fix link target to be "_top" instead of "mainFrame", due to nav now being in iframe -->
     <xsl:template match="a/@target[. = 'mainFrame']" priority="+1">
         <xsl:attribute name="target">

@@ -7,8 +7,9 @@
     xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://www.w3.org/1999/xhtml" 
 	xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:leg="http://www.legislation.gov.uk/namespaces/legislation"
 	xmlns:ukm="http://www.legislation.gov.uk/namespaces/metadata"
+	xmlns:fo="http://www.w3.org/1999/XSL/Format"
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
-    exclude-result-prefixes="xs a rng cm ci err xhtml dc leg ukm" expand-text="true"
+    exclude-result-prefixes="xs a rng cm ci err xhtml dc leg ukm fo" expand-text="true"
     version="3.0">
     <doc xmlns="http://www.oxyegnxml.com/ns/doc/xsl">
         <p>This XSLT generates an index page for the User Guide from its ToC (post-processing) and an existing index page.</p>
@@ -36,7 +37,7 @@
     </xsl:template>
     
     <xsl:template match="div[@class='toc']">
-        <xsl:variable name="vUserGuideToC" select="doc(concat($gpOutputFolder,'/',$gpUserGuide))//nav[@id='contents']"/>
+        <xsl:variable name="vUserGuideToC" select="doc(concat($gpOutputFolder,'/',$gpUserGuide))//div[@id='contents']"/>
         <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates select="$vUserGuideToC" mode="reprocessUserGuideToCForIndex"/>
@@ -50,7 +51,7 @@
         </xsl:copy>
     </xsl:template>
     
-    <xsl:template match="nav[@id='contents']//a" mode="reprocessUserGuideToCForIndex">
+    <xsl:template match="div[@id='contents']//a" mode="reprocessUserGuideToCForIndex">
         <xsl:copy copy-namespaces="no">
             <xsl:copy-of select="@* except @href"/>
             <xsl:attribute name="href" select="concat($gpUserGuide, '#', substring-after(@href, '#'))"/>

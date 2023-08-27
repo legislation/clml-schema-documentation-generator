@@ -46,8 +46,13 @@
         <p:with-param name="gpReferenceGuide" select="$pReferenceGuide"/>
         <p:with-param name="gpUserGuide" select="$pUserGuide"/>
     </p:xslt>
+    <!-- PA 15/5/23: have to set an XHTML 1.0 Transitional doctype here:
+        * Can't use HTML5 because Calabash apparently chokes when outputting HTML
+        * XHTML 1.0 Strict and 1.1 don't allow (i)frames -->
     <p:store name="userGuideOut">
       <p:with-option name="href" select="concat($pOutputFolder,'/', $pHtmlFilename)"/>
+      <p:with-option name="doctype-public" select="'-//W3C//DTD XHTML 1.0 Transitional//EN'"/>
+      <p:with-option name="doctype-system" select="'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'"/>
     </p:store>
     
 </p:declare-step>

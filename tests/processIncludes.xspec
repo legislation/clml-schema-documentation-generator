@@ -5,8 +5,9 @@
 HELPFUL NOTES:
 
  - Top level el in output XML file *must* have xmlns="http://www.w3.org/1999/xhtml" or you'll get weird errors
- - If you want to apply transform to context AFTER transformation, use <x:context/> and then <x:call template=""/>,
-   use a template for <x:call/> that calls <xsl:apply-templates select="."/> to do initial transform and then
+ - If you want to apply transform to context AFTER transformation:
+    * use <x:context/>
+    * then use <x:call template=""/> with a template for that calls <xsl:apply-templates select="."/> to do initial transform and then
    apply the subsequent transforms you want
 
 -->

@@ -7,8 +7,9 @@
     xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://www.w3.org/1999/xhtml" 
     xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:leg="http://www.legislation.gov.uk/namespaces/legislation"
     xmlns:ukm="http://www.legislation.gov.uk/namespaces/metadata"
+    xmlns:fo="http://www.w3.org/1999/XSL/Format"
     xpath-default-namespace="http://www.w3.org/1999/xhtml"
-    exclude-result-prefixes="xs a rng cm ci err xhtml ukm dc leg" expand-text="true"
+    exclude-result-prefixes="xs a rng cm ci err xhtml ukm dc leg fo" expand-text="true"
     version="3.0">
     
     <doc xmlns="http://www.oxyegnxml.com/ns/doc/xsl">
@@ -98,12 +99,12 @@
     
     <!-- ======== generate a Toc =========== -->
     <xsl:template match="ci:toc" priority="+1">
-       <nav class="contents" id="contents">
+       <div class="contents" id="contents">
            <h2>Contents</h2>
            <ul class="toc-1">
              <xsl:apply-templates select="ancestor::body//h2" mode="toc"/>
            </ul>
-       </nav>
+       </div>
     </xsl:template>
     
     <xsl:template match="ci:toc" mode="toc"/>
@@ -347,7 +348,7 @@
                                                 <!-- PA 26/4/22: Add ability to exclude nodes -->
                                                 <xsl:variable name="vNodesToExclude" as="xs:string*">
                                                     <xsl:if test="$vXpathExcludeSelector">
-                                                        <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, $vDocPart, $vFilename, $vXpath)"/>
+                                                        <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, ., $vFilename, $vXpath)"/>
                                                     </xsl:if>
                                                 </xsl:variable>
                                                 <xsl:try>
@@ -383,7 +384,7 @@
                                                 <!-- PA 26/4/22: Add ability to exclude nodes -->
                                                 <xsl:variable name="vNodesToExclude" as="xs:string*">
                                                     <xsl:if test="$vXpathExcludeSelector">
-                                                        <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, $vDocPart, $vFilename, $vXpath)"/>
+                                                        <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, ., $vFilename, $vXpath)"/>
                                                     </xsl:if>
                                                 </xsl:variable>
                                                 <xsl:try>
@@ -427,16 +428,18 @@
                                                     </p>
                                                 </xsl:when>
                                                 <xsl:otherwise>
-                                                    <!-- PA 26/4/22: Add ability to exclude nodes -->
-                                                    <xsl:variable name="vNodesToExclude" as="xs:string*">
-                                                        <xsl:if test="$vXpathExcludeSelector">
-                                                            <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, $vDocPart, $vFilename, $vXpath)"/>
-                                                        </xsl:if>
-                                                    </xsl:variable>
-                                                    <xsl:apply-templates select="$vDocPart">
-                                                        <xsl:with-param name="pDocType" select="$vDocType"/>
-                                                        <xsl:with-param name="pNodesToExclude" select="$vNodesToExclude"/>
-                                                    </xsl:apply-templates>
+                                                    <xsl:for-each select="$vDocPart">
+                                                        <!-- PA 26/4/22: Add ability to exclude nodes -->
+                                                        <xsl:variable name="vNodesToExclude" as="xs:string*">
+                                                            <xsl:if test="$vXpathExcludeSelector">
+                                                                <xsl:sequence select="leg:calculateNodesToExclude($vXpathExcludeSelector, ., $vFilename, $vXpath)"/>
+                                                            </xsl:if>
+                                                        </xsl:variable>
+                                                        <xsl:apply-templates select=".">
+                                                            <xsl:with-param name="pDocType" select="$vDocType"/>
+                                                            <xsl:with-param name="pNodesToExclude" select="$vNodesToExclude"/>
+                                                        </xsl:apply-templates>
+                                                    </xsl:for-each>
                                                 </xsl:otherwise>
                                             </xsl:choose>
                                         </xsl:otherwise>
@@ -525,7 +528,9 @@
                 <xsl:variable name="vInitialIndent" select="replace(*[last()]/following-sibling::text()[self::text()[normalize-space()=''] and (position() = last())],'\n','')" as="xs:string?"/>
                 <xsl:variable name="vSampleXML" as="node()*">
                     <xsl:if test="(count($pNodesToOutput) = 0 or $pNodesToOutput = generate-id(.)) and (count($pNodesToExclude) = 0 or not($pNodesToExclude = generate-id(.)))">
-                        <xsl:call-template name="outputEscapedStartElementName"/>
+                        <xsl:call-template name="outputEscapedStartElementName">
+                            <xsl:with-param name="pNodesToExclude" select="$pNodesToExclude"/>
+                        </xsl:call-template>
                         <xsl:choose>
                             <xsl:when test="$pDocPartSubContent">
                                 <xsl:text>
@@ -565,7 +570,9 @@
                             IF there was a start indent-\->
                         <xsl:text>  </xsl:text>
                     </xsl:if>-->
-                    <xsl:call-template name="outputEscapedStartElementName"/>
+                    <xsl:call-template name="outputEscapedStartElementName">
+                        <xsl:with-param name="pNodesToExclude" select="$pNodesToExclude"/>
+                    </xsl:call-template>
 
                     <xsl:apply-templates select="node()">
                         <xsl:with-param name="pDocType" select="$pDocType"/>
@@ -590,10 +597,16 @@
     </xsl:template>
     
     <xsl:template name="outputEscapedStartElementName">
+        <!-- PA 16/5/2023: exclude attribute nodes if they're selected to exclude -->
+        <xsl:param name="pNodesToExclude" select="()" as="xs:string*"/>
+
         <span class="tEl"><xsl:text>&lt;</xsl:text><xsl:value-of select="name()"/></span>
         <xsl:for-each select="@*">
-            <span class="tAN"><xsl:text> </xsl:text><xsl:value-of select="name()"/><xsl:text>=</xsl:text></span>
-            <span class="tAV"><xsl:text>"</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text></span>
+            <!-- PA 16/5/2023: exclude attribute nodes if they're selected to exclude -->
+            <xsl:if test="count($pNodesToExclude) = 0 or not($pNodesToExclude = generate-id(.))">
+                <span class="tAN"><xsl:text> </xsl:text><xsl:value-of select="name()"/><xsl:text>=</xsl:text></span>
+                <span class="tAV"><xsl:text>"</xsl:text><xsl:value-of select="."/><xsl:text>"</xsl:text></span>
+            </xsl:if>
         </xsl:for-each>
         <xsl:choose>
             <xsl:when test="* or text()[normalize-space()]">
@@ -665,7 +678,7 @@
         <xsl:try>
             <!-- needs Saxon EE/PE or if using HE must be version 10 and above -->
             <!-- Must be cast as element(), otherwise generate-id() won't generate the right IDs -->
-            <xsl:variable name="vExcludedNodesNoDescendants" as="element()*">
+            <xsl:variable name="vExcludedNodesNoDescendants" as="item()*">
                 <xsl:evaluate xpath="$pXpathExcludeSelector" context-item="$pContextNode"/>
             </xsl:variable>
             <xsl:choose>

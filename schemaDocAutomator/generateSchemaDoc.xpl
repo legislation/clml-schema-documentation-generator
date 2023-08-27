@@ -27,7 +27,7 @@
      <h:li>manipulate XSD comments and pull in custom include link references to other content by looking up fixed or auto-generated schema ids in a map file</h:li>
      <h:li>Run oXygen script with configured settings to create XHTML plus navigation images</h:li>
      <h:li>Post process the XHTML to resolve custom includes and to manipulate frame and navigation</h:li>
-     <h:li>Post process will also optionally process any user guide file (passed as a parameter) including any contents and generating a table of contents from <h:code>h2</h:code>–<h:code>h5</h:code> headings of divs, where a <h:code>ci:toc</h:code> element is found.</h:li>
+     <h:li>Post process will also optionally process any user guide file (passed as a parameter) including any contents and generating a table of contents from <h:code>h2</h:code>–<h:code>h4</h:code> headings of divs, where a <h:code>ci:toc</h:code> element is found.</h:li>
     </h:ul>
     <h:p>For a description of the HTML manipulation please refer to the documentation in "postProcessHTML.xslt"</h:p>
     <h:p>For a description of the custom include mechanism, its attributes and the id map file please refer to the documentation in "processIncludes.xsl"</h:p>
