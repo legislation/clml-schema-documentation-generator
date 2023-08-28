@@ -51,8 +51,10 @@
         * XHTML 1.0 Strict and 1.1 don't allow (i)frames -->
     <p:store name="userGuideOut">
       <p:with-option name="href" select="concat($pOutputFolder,'/', $pHtmlFilename)"/>
+      <!-- PA 28/8/23: Commenting out temporarily as is causing difficult-to-fix errors - 
+           XML parser wants to load this DTD, but W3C servers are rejecting it
       <p:with-option name="doctype-public" select="'-//W3C//DTD XHTML 1.0 Transitional//EN'"/>
-      <p:with-option name="doctype-system" select="'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'"/>
+      <p:with-option name="doctype-system" select="'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'"/>-->
     </p:store>
     
 </p:declare-step>
