@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <x:description xmlns:x="http://www.jenitennison.com/xslt/xspec" xmlns:ci="http://macksol.co.uk/include" xmlns:h="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:test-helper="x-urn:xspec:helper:ws-only-text:test-helper" stylesheet="file:/C:/Users/parnott/Source/Repos/tna.doctools.schemadocgenerator/schemaDocAutomator/processIncludes.xsl">
+	xmlns:test-helper="x-urn:xspec:helper:ws-only-text:test-helper" stylesheet="../schemaDocAutomator/processIncludes.xsl">
 <!--
 HELPFUL NOTES:
 

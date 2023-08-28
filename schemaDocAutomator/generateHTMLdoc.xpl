@@ -52,12 +52,12 @@
         <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility -->
         <!-- PA 28/3/23 - fixing substitution for Unix systems -->
         <p:variable name="vInputSchemaFileNoExt" select="substring-before($pInputSchemaFile,'.')"/>
-        <p:variable name="vInputFolderLocalPath" select="concat(replace(replace($pTempFolder,'file:/([A-Za-z]:/)','$1'),'file:',''),'/xsd/',$vInputSchemaFileNoExt,'.xsd')"/>
+        <p:variable name="vInputFolderLocalPath" select="concat(replace(replace($pTempFolder,'^file:/([A-Za-z]:/)','$1'),'^file:',''),'/xsd/',$vInputSchemaFileNoExt,'.xsd')"/>
       
         <!-- PA 11/3/22 - removing the substitution of / here to ensure Unix compatibility
         <p:variable name="vOxygenPath" select="replace(substring-after($pOxygenPath,'file:/'),'/','\\')"/>
         <p:variable name="vSettingsFolderLocalPath" select="replace($pWorkingDirectoryPath,'/','\\')"/> -->
-        <p:variable name="vOxygenPath" select="substring-after($pOxygenPath,'file:/')"/>
+        <p:variable name="vOxygenPath" select="replace(replace($pOxygenPath,'^file:/([A-Za-z]:/)','$1'),'^file:','')"/>
         <p:variable name="vSettingsFolderLocalPath" select="$pWorkingDirectoryPath"/>
         
         <!-- PA 11/3/22 - the XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
@@ -65,7 +65,7 @@
         <p:variable name="vOxygenPathQuotes" select='concat($vQuote,$vOxygenPath,$vQuote)'/>
         <p:variable name="vInputFolderLocalPathQuotes" select='concat($vQuote, $vInputFolderLocalPath, $vQuote)'/> -->
         <p:variable name="vSettingsTempFilename" select="concat(replace(substring-before(xs:string(current-dateTime()),'.'),':',''),'.xml')"/>
-        <p:variable name="vSettingsTempFullPath" select="concat('file:/', $vSettingsFolderLocalPath, '/', $vSettingsTempFilename)"/>
+        <p:variable name="vSettingsTempFullPath" select="replace(concat('file:',$vSettingsFolderLocalPath,'/',$vSettingsTempFilename),'^file:([A-Za-z]:)','file:/$1')"/>
       
         <!-- PA 11/3/22 - changing launchOxygen script call to enable cross-platform compatibility
           The XProc p:exec step treats space as an arg separator by default even if quoted, so quoting won't be sufficient
@@ -112,7 +112,7 @@
               <p:catch>
                 <p:output port="result"><p:pipe port="result" step="xsd2htmlother"/></p:output>
                 <p:exec name="xsd2htmlother" source-is-xml="false" result-is-xml="false">
-                  <p:with-option name="command" select="'sh'"/>
+                  <p:with-option name="command" select="'bash'"/>
                   <p:with-option name="cwd" select="$pWorkingDirectoryPath"/>
                   <p:with-option name="args" select="string-join(('launchOxygen.sh', $vOxyArgs), $vTab)"/>
                   <p:with-option name="arg-separator" select="$vTab"/>
